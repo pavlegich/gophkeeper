@@ -13,6 +13,7 @@ import (
 // ServerConfig contains values of server flags and environments.
 type ServerConfig struct {
 	Address string `env:"ADDRESS" json:"address"`
+	DSN     string `env:"DATABASE_DSN" json:"database_dsn"`
 }
 
 // NewServerConfig returns new server config.
@@ -24,6 +25,7 @@ func NewServerConfig(ctx context.Context) *ServerConfig {
 // when launching the server.
 func (cfg *ServerConfig) ParseFlags(ctx context.Context) error {
 	flag.StringVar(&cfg.Address, "a", "localhost:8080", "HTTP-server endpoint address host:port")
+	flag.StringVar(&cfg.DSN, "d", "postgresql://localhost:5432/gophkeeper", "URI (DSN) to database")
 
 	flag.Parse()
 

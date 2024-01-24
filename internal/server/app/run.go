@@ -11,8 +11,10 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/infra/database"
 	"github.com/pavlegich/gophkeeper/internal/infra/logger"
 	"github.com/pavlegich/gophkeeper/internal/server"
+	"github.com/pavlegich/gophkeeper/internal/server/controllers/handlers"
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
 )
@@ -37,8 +39,22 @@ func Run(idleConnsClosed chan struct{}) error {
 		return fmt.Errorf("Run: parse flags failed %w", err)
 	}
 
+	// Database
+	db, err := database.Init(ctx, cfg.DSN)
+	if err != nil {
+		return fmt.Errorf("Run: database initialization failed %w", err)
+	}
+	defer db.Close()
+
+	// Router
+	ctrl := handlers.NewController(ctx, db, cfg)
+	router, err := ctrl.BuildRoute(ctx)
+	if err != nil {
+		return fmt.Errorf("Run: build server route failed %w", err)
+	}
+
 	// Server
-	srv, err := server.NewServer(ctx, cfg)
+	srv, err := server.NewServer(ctx, router, cfg)
 	if err != nil {
 		return fmt.Errorf("Run: server initialization failed %w", err)
 	}

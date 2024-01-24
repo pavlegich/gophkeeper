@@ -17,6 +17,7 @@ require (
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1
+	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect

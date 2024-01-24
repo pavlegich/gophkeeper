@@ -17,9 +17,10 @@ type Server struct {
 }
 
 // NewServer initializes controller and router, returns new server object.
-func NewServer(ctx context.Context, cfg *config.ServerConfig) (*Server, error) {
+func NewServer(ctx context.Context, router *chi.Mux, cfg *config.ServerConfig) (*Server, error) {
 	r := chi.NewRouter()
 	r.Use(middlewares.Recovery)
+	r.Mount("/", router)
 
 	srv := &http.Server{
 		Addr:    cfg.Address,

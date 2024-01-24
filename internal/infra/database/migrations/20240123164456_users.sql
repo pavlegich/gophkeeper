@@ -5,7 +5,7 @@ SELECT 'up SQL query';
 
 CREATE TABLE IF NOT EXISTS users (
     id serial PRIMARY KEY,
-    name varchar(64) UNIQUE NOT NULL,
+    login varchar(64) UNIQUE NOT NULL,
     password bytea NOT NULL
 );
 
