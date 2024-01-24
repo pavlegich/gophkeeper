@@ -25,7 +25,7 @@ func NewServerConfig(ctx context.Context) *ServerConfig {
 // when launching the server.
 func (cfg *ServerConfig) ParseFlags(ctx context.Context) error {
 	flag.StringVar(&cfg.Address, "a", "localhost:8080", "HTTP-server endpoint address host:port")
-	flag.StringVar(&cfg.DSN, "d", "postgresql://localhost:5432/gophkeeper", "URI (DSN) to database")
+	flag.StringVar(&cfg.DSN, "d", "postgresql://localhost:5432/postgres", "URI (DSN) to database")
 
 	flag.Parse()
 

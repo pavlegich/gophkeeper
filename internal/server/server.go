@@ -1,4 +1,4 @@
-// Package server contains object Server and its methods.
+// Package server contains Server object and its methods.
 package server
 
 import (
@@ -17,10 +17,10 @@ type Server struct {
 }
 
 // NewServer initializes controller and router, returns new server object.
-func NewServer(ctx context.Context, router *chi.Mux, cfg *config.ServerConfig) (*Server, error) {
+func NewServer(ctx context.Context, mh *chi.Mux, cfg *config.ServerConfig) (*Server, error) {
 	r := chi.NewRouter()
 	r.Use(middlewares.Recovery)
-	r.Mount("/", router)
+	r.Mount("/", mh)
 
 	srv := &http.Server{
 		Addr:    cfg.Address,

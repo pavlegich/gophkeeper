@@ -20,7 +20,7 @@ import (
 )
 
 // Run initialized the main app components and runs the server.
-func Run(idleConnsClosed chan struct{}) error {
+func Run() error {
 	// Context
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
@@ -65,14 +65,13 @@ func Run(idleConnsClosed chan struct{}) error {
 		ctxShutdown, cancelShutdown := context.WithTimeout(ctx, 5*time.Second)
 		defer cancelShutdown()
 
+		logger.Log.Info("shutting down gracefully...")
+
 		err := srv.Shutdown(ctxShutdown)
 		if err != nil {
 			logger.Log.Error("server shutdown failed",
 				zap.Error(err))
 		}
-
-		logger.Log.Info("shutting down gracefully...")
-		close(idleConnsClosed)
 	}()
 
 	logger.Log.Info("running server", zap.String("addr", srv.GetAddress(ctx)))

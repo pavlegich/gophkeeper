@@ -6,9 +6,9 @@ import "context"
 
 // User contains information about user.
 type User struct {
-	ID       int    `json:"id"`
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	ID       int    `db:"id" json:"id"`
+	Login    string `db:"login" json:"login"`
+	Password string `db:"password" json:"password"`
 }
 
 // Service describes methods related with user

@@ -8,13 +8,9 @@ import (
 )
 
 func main() {
-	idleConnsClosed := make(chan struct{})
-
-	if err := app.Run(idleConnsClosed); err != nil {
+	if err := app.Run(); err != nil {
 		logger.Log.Error("main: run app failed",
 			zap.Error(err))
 	}
-
-	<-idleConnsClosed
 	logger.Log.Info("quit")
 }

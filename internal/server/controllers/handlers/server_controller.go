@@ -1,5 +1,5 @@
 // Package handlers contains server controller object and
-// methods for building the server
+// methods for building the server.
 package handlers
 
 import (
@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
 	"github.com/pavlegich/gophkeeper/internal/server/controllers/middlewares"
+	users "github.com/pavlegich/gophkeeper/internal/server/domains/user/controllers/http"
 )
 
 // Controller contains database and configuration
@@ -31,6 +32,9 @@ func (c *Controller) BuildRoute(ctx context.Context) (*chi.Mux, error) {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.WithLogging)
+	r.Use(middlewares.WithCompress)
+
+	users.Activate(r, c.cfg, c.db)
 
 	return r, nil
 }

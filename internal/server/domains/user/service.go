@@ -34,7 +34,7 @@ func (s *UserService) Register(ctx context.Context, user *User) (*User, error) {
 	return user, nil
 }
 
-// Login validates the obtained user data and returns stored user.
+// Login validates the obtained user credentials and returns stored user.
 func (s *UserService) Login(ctx context.Context, user *User) (*User, error) {
 	storedUser, err := s.repo.GetUserByLogin(ctx, user.Login)
 	if err != nil {
