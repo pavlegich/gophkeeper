@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
 	"github.com/pavlegich/gophkeeper/internal/server/controllers/middlewares"
+	data "github.com/pavlegich/gophkeeper/internal/server/domains/data/controllers/http"
 	users "github.com/pavlegich/gophkeeper/internal/server/domains/user/controllers/http"
 )
 
@@ -32,9 +33,11 @@ func (c *Controller) BuildRoute(ctx context.Context) (*chi.Mux, error) {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.WithLogging)
+	r.Use(middlewares.WithAuth(c.cfg.Token))
 	r.Use(middlewares.WithCompress)
 
 	users.Activate(r, c.cfg, c.db)
+	data.Activate(r, c.cfg, c.db)
 
 	return r, nil
 }

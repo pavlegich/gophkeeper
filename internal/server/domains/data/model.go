@@ -19,15 +19,15 @@ type Data struct {
 }
 
 type Service interface {
-	Create(ctx context.Context, data *Data) (*Data, error)
+	Create(ctx context.Context, data *Data) error
 	Unload(ctx context.Context, name string) (*Data, error)
 	Edit(ctx context.Context, data *Data) error
 	Delete(ctx context.Context, name string) error
 }
 
 type Repository interface {
-	GetByName(ctx context.Context, name string) (*Data, error)
-	Create(ctx context.Context, data *Data) error
-	Update(ctx context.Context, data *Data) error
-	Delete(ctx context.Context, name string) error
+	GetDataByName(ctx context.Context, name string) (*Data, error)
+	CreateData(ctx context.Context, data *Data) error
+	UpdateData(ctx context.Context, data *Data) error
+	DeleteDataByName(ctx context.Context, name string) error
 }

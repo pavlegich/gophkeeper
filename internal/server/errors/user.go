@@ -1,3 +1,4 @@
+// Package errors contatins variables with error explainations.
 package errors
 
 import "errors"
