@@ -3,6 +3,8 @@ package app
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
 	"os"
 	"os/signal"
@@ -12,6 +14,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
 	"github.com/pavlegich/gophkeeper/internal/infra/database"
+	"github.com/pavlegich/gophkeeper/internal/infra/hash"
 	"github.com/pavlegich/gophkeeper/internal/infra/logger"
 	"github.com/pavlegich/gophkeeper/internal/server"
 	"github.com/pavlegich/gophkeeper/internal/server/controllers/handlers"
@@ -45,6 +48,13 @@ func Run() error {
 		return fmt.Errorf("Run: database initialization failed %w", err)
 	}
 	defer db.Close()
+
+	// Generate keys for token
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return fmt.Errorf("Run: generate private key failed")
+	}
+	cfg.Token = hash.NewToken(privateKey, &privateKey.PublicKey, cfg.TokenExp)
 
 	// Router
 	ctrl := handlers.NewController(ctx, db, cfg)

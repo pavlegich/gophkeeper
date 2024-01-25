@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// UserHandler contatins objects for work
+// UserHandler contains objects for work
 // with user handlers.
 type UserHandler struct {
 	Config  *config.ServerConfig
@@ -67,7 +67,7 @@ func (h *UserHandler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.Service.Register(ctx, &req)
+	currentUser, err := h.Service.Register(ctx, &req)
 	if err != nil {
 		if errors.Is(err, errs.ErrLoginBusy) {
 			w.WriteHeader(http.StatusConflict)
@@ -79,9 +79,17 @@ func (h *UserHandler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := h.Config.Token.Create(ctx, currentUser.ID)
+	if err != nil {
+		logger.Log.Error("HandleRegister: create token failed",
+			zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cookie := &http.Cookie{
 		Name:  "auth",
-		Value: "secret",
+		Value: token,
 		Path:  "/api/user/",
 		// Secure: true,
 		HttpOnly: true,
@@ -115,7 +123,7 @@ func (h *UserHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.Service.Login(ctx, &req)
+	currentUser, err := h.Service.Login(ctx, &req)
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -129,15 +137,23 @@ func (h *UserHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie := http.Cookie{
+	token, err := h.Config.Token.Create(ctx, currentUser.ID)
+	if err != nil {
+		logger.Log.Error("HandleLogin: create token failed",
+			zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	cookie := &http.Cookie{
 		Name:  "auth",
-		Value: "secret",
+		Value: token,
 		Path:  "/api/user/",
 		// Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)
 }
 

@@ -6,14 +6,18 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/pavlegich/gophkeeper/internal/infra/hash"
 )
 
 // ServerConfig contains values of server flags and environments.
 type ServerConfig struct {
-	Address string `env:"ADDRESS" json:"address"`
-	DSN     string `env:"DATABASE_DSN" json:"database_dsn"`
+	Address  string        `env:"ADDRESS" json:"address"`
+	DSN      string        `env:"DATABASE_DSN" json:"database_dsn"`
+	TokenExp time.Duration `end:"TOKEN_EXP" json:"token_exp"`
+	Token    *hash.Token
 }
 
 // NewServerConfig returns new server config.
@@ -26,6 +30,7 @@ func NewServerConfig(ctx context.Context) *ServerConfig {
 func (cfg *ServerConfig) ParseFlags(ctx context.Context) error {
 	flag.StringVar(&cfg.Address, "a", "localhost:8080", "HTTP-server endpoint address host:port")
 	flag.StringVar(&cfg.DSN, "d", "postgresql://localhost:5432/postgres", "URI (DSN) to database")
+	flag.DurationVar(&cfg.TokenExp, "exp", 3*time.Second, "Expiration period for token")
 
 	flag.Parse()
 

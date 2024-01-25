@@ -1,4 +1,4 @@
-// Package repository contains Repository object
+// Package repository contains repository object
 // and methods for interaction between service and storage.
 package repository
 
