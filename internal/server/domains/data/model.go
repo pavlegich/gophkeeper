@@ -12,6 +12,7 @@ type Data struct {
 	ID        int       `db:"id" json:"id"`
 	UserID    int       `db:"user_id" json:"user_id"`
 	Name      string    `db:"name" json:"name"`
+	Type      string    `db:"type" json:"type"`
 	Data      string    `db:"data" json:"data"`
 	Metadata  string    `db:"metadata" json:"metadata"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`

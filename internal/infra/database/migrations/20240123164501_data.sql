@@ -3,10 +3,12 @@
 SELECT 'up SQL query';
 -- +goose StatementEnd
 
+CREATE TYPE type AS ENUM ('CREDENTIALS', 'TEXT', 'BINARY', 'CARD');
 CREATE TABLE IF NOT EXISTS data (
     id serial PRIMARY KEY,
     user_id integer REFERENCES users (id),
     name varchar(64),
+    type type,
     data bytea,
     created_at timestamp DEFAULT NOW(),
     metadata json
@@ -24,3 +26,4 @@ SELECT 'down SQL query';
 DROP INDEX data_name_idx;
 DROP INDEX data_user_id_idx;
 DROP TABLE data;
+DROP TYPE type;
