@@ -3,7 +3,7 @@
 SELECT 'up SQL query';
 -- +goose StatementEnd
 
-CREATE TYPE data_type AS ENUM ('CREDENTIALS', 'TEXT', 'BINARY', 'CARD');
+CREATE TYPE data_type AS ENUM ('credentials', 'text', 'binary', 'card');
 CREATE TABLE IF NOT EXISTS data (
     id serial PRIMARY KEY,
     user_id integer REFERENCES users (id),

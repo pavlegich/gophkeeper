@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Data contains
 type Data struct {
 	ID        int       `db:"id" json:"id"`
 	UserID    int       `db:"user_id" json:"user_id"`
@@ -20,14 +21,14 @@ type Data struct {
 
 type Service interface {
 	Create(ctx context.Context, data *Data) error
-	Unload(ctx context.Context, name string) (*Data, error)
+	Unload(ctx context.Context, dType string, name string) (*Data, error)
 	Edit(ctx context.Context, data *Data) error
-	Delete(ctx context.Context, name string) error
+	Delete(ctx context.Context, dType string, name string) error
 }
 
 type Repository interface {
-	GetDataByName(ctx context.Context, name string) (*Data, error)
+	GetDataByName(ctx context.Context, dType string, name string) (*Data, error)
 	CreateData(ctx context.Context, data *Data) error
 	UpdateData(ctx context.Context, data *Data) error
-	DeleteDataByName(ctx context.Context, name string) error
+	DeleteDataByName(ctx context.Context, dType string, name string) error
 }

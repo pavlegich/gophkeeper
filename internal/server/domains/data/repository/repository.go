@@ -28,7 +28,7 @@ func NewDataRepository(db *sql.DB) *Repository {
 }
 
 // GetDataByName gets data by name from the storage and returns data object.
-func (r *Repository) GetDataByName(ctx context.Context, name string) (*data.Data, error) {
+func (r *Repository) GetDataByName(ctx context.Context, dType string, name string) (*data.Data, error) {
 	err := r.db.PingContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("GetDataByName: connection to database is died %w", err)
@@ -38,13 +38,9 @@ func (r *Repository) GetDataByName(ctx context.Context, name string) (*data.Data
 	if err != nil {
 		return nil, fmt.Errorf("GetDataByName: couldn't read user id from the context %w", err)
 	}
-	dType, err := utils.GetTypeFromContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("GetDataByName: couldn't read data type from the context %w", err)
-	}
 
 	row := r.db.QueryRowContext(ctx, `SELECT id, user_id, name, data_type, data, created_at, metadata 
-	FROM data WHERE user_id = $1, data_type = $2, name = $3`, userID, dType, name)
+	FROM data WHERE user_id = $1 AND data_type = $2 AND name = $3`, userID, dType, name)
 
 	var storedData data.Data
 	err = row.Scan(&storedData.ID, &storedData.UserID, &storedData.Name, &storedData.Type,
@@ -113,14 +109,18 @@ func (r *Repository) UpdateData(ctx context.Context, data *data.Data) error {
 		return fmt.Errorf("UpdateData: connection to database in died %w", err)
 	}
 
-	_, err = r.db.ExecContext(ctx, `UPDATE data SET data = $1, metadata = $2 
-	WHERE user_id = $3, name = $4, data_type = $5`,
+	res, err := r.db.ExecContext(ctx, `UPDATE data SET data = $1, metadata = $2 
+	WHERE user_id = $3 AND name = $4 AND data_type = $5`,
 		data.Data, data.Metadata, data.UserID, data.Name, data.Type)
 	if err != nil {
 		return fmt.Errorf("UpdateData: update table failed %w", err)
 	}
 
-	if errors.Is(err, sql.ErrNoRows) {
+	rowsCount, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("UpdateData: couldn't get rows affected %w", err)
+	}
+	if rowsCount == 0 {
 		return fmt.Errorf("UpdateData: nothing to update, %w", errs.ErrDataNotFound)
 	}
 
@@ -128,7 +128,7 @@ func (r *Repository) UpdateData(ctx context.Context, data *data.Data) error {
 }
 
 // DeleteDataByName deletes requested data by it's name.
-func (r *Repository) DeleteDataByName(ctx context.Context, name string) error {
+func (r *Repository) DeleteDataByName(ctx context.Context, dType string, name string) error {
 	err := r.db.PingContext(ctx)
 	if err != nil {
 		return fmt.Errorf("DeleteData: connection to database in died %w", err)
@@ -138,15 +138,19 @@ func (r *Repository) DeleteDataByName(ctx context.Context, name string) error {
 	if err != nil {
 		return fmt.Errorf("DeleteDataByName: couldn't read user id from the context %w", err)
 	}
-	dType, err := utils.GetTypeFromContext(ctx)
-	if err != nil {
-		return fmt.Errorf("DeleteDataByName: couldn't read data type from the context %w", err)
-	}
 
-	_, err = r.db.ExecContext(ctx, `DELETE FROM data WHERE user_id = $1, data_type = $2, name = $3`,
+	res, err := r.db.ExecContext(ctx, `DELETE FROM data WHERE user_id = $1 AND data_type = $2 AND name = $3`,
 		userID, dType, name)
 	if err != nil {
 		return fmt.Errorf("DeleteDataByName: couldn't delete data from the storage %w", err)
+	}
+
+	rowsCount, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("DeleteDataByName: couldn't get rows affected %w", err)
+	}
+	if rowsCount == 0 {
+		return fmt.Errorf("DeleteDataByName: nothing to delete, %w", errs.ErrDataNotFound)
 	}
 
 	return nil

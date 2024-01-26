@@ -3,9 +3,6 @@ package data
 import (
 	"context"
 	"fmt"
-
-	errs "github.com/pavlegich/gophkeeper/internal/server/errors"
-	"github.com/pavlegich/gophkeeper/internal/utils"
 )
 
 // DataService contatins objects for user service.
@@ -22,9 +19,6 @@ func NewDataService(repo Repository) *DataService {
 
 // Create upload new data into the storage.
 func (s *DataService) Create(ctx context.Context, data *Data) error {
-	if !utils.IsCorrectDataType(data.Type) {
-		return fmt.Errorf("Create: %w", errs.ErrDataTypeIncorrect)
-	}
 	err := s.repo.CreateData(ctx, data)
 	if err != nil {
 		return fmt.Errorf("Create: create data failed %w", err)
@@ -32,9 +26,9 @@ func (s *DataService) Create(ctx context.Context, data *Data) error {
 	return nil
 }
 
-// Unload unloads data by name and returns data object.
-func (s *DataService) Unload(ctx context.Context, name string) (*Data, error) {
-	d, err := s.repo.GetDataByName(ctx, name)
+// Unload unloads data by type and name, returns data object.
+func (s *DataService) Unload(ctx context.Context, dType string, name string) (*Data, error) {
+	d, err := s.repo.GetDataByName(ctx, dType, name)
 	if err != nil {
 		return nil, fmt.Errorf("Unload: get data failed %w", err)
 	}
@@ -51,8 +45,8 @@ func (s *DataService) Edit(ctx context.Context, data *Data) error {
 }
 
 // Delete deletes requested user's data from the storage.
-func (s *DataService) Delete(ctx context.Context, name string) error {
-	err := s.repo.DeleteDataByName(ctx, name)
+func (s *DataService) Delete(ctx context.Context, dType string, name string) error {
+	err := s.repo.DeleteDataByName(ctx, dType, name)
 	if err != nil {
 		return fmt.Errorf("Delete: delete data failed %w", err)
 	}
