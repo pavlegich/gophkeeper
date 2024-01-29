@@ -25,7 +25,8 @@ import (
 // Run initialized the main app components and runs the server.
 func Run() error {
 	// Context
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
 	// Logger

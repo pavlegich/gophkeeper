@@ -1,18 +1,5 @@
 package utils
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"io"
-	"mime"
-	"mime/multipart"
-	"net/http"
-	"strings"
-
-	"github.com/pavlegich/gophkeeper/internal/server/domains/data"
-)
-
 // IsValidDataType checks whether the data type is correct.
 func IsValidDataType(t string) bool {
 	if t == "credentials" || t == "text" || t == "binary" || t == "card" {
@@ -21,45 +8,29 @@ func IsValidDataType(t string) bool {
 	return false
 }
 
-// GetMultipartDataFromRequest reads multipart fields from the request and returns
-// the data object with the obtained multipart data.
-func GetMultipartDataFromRequest(ctx context.Context, r *http.Request, d *data.Data) (*data.Data, error) {
-	mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil {
-		return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't get media type %w", err)
-	}
+// IsValidCardNumber checks whether the bank card number
+// is valid using Luhn algorithm.
+func IsValidCardNumber(number int) bool {
+	return (number%10+checksum(number/10))%10 == 0
+}
 
-	multiparted := d
+// checkSum checks one part of bank card number
+// for validity using Luhn algorithm.
+func checksum(number int) int {
+	var luhn int
 
-	if strings.HasPrefix(mediaType, "multipart/") {
-		multipartReader := multipart.NewReader(r.Body, params["boundary"])
-		defer r.Body.Close()
+	for i := 0; number > 0; i++ {
+		cur := number % 10
 
-		for {
-			field, err := multipartReader.NextPart()
-			if err != nil {
-				if errors.Is(err, io.EOF) {
-					break
-				}
-				return nil, fmt.Errorf("GetMultipartDataFromRequest: get next multi part failed %w", err)
-			}
-			defer field.Close()
-
-			// pay attention to read large file
-			switch field.FormName() {
-			case "data":
-				multiparted.Data, err = io.ReadAll(field)
-				if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-					return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't read data from the field data %w", err)
-				}
-			case "metadata":
-				multiparted.Metadata, err = io.ReadAll(field)
-				if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-					return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't read data from the field metadata %w", err)
-				}
+		if i%2 == 0 {
+			cur = cur * 2
+			if cur > 9 {
+				cur = cur%10 + cur/10
 			}
 		}
-	}
 
-	return multiparted, nil
+		luhn += cur
+		number = number / 10
+	}
+	return luhn % 10
 }

@@ -6,6 +6,7 @@ package http
 import (
 	"database/sql"
 	"errors"
+	"mime"
 	"net/http"
 	"strconv"
 
@@ -63,15 +64,16 @@ func (h *DataHandler) HandleDataUpload(w http.ResponseWriter, r *http.Request) {
 		Name:   chi.URLParam(r, "dataName"),
 	}
 
-	switch req.Type {
-	case "text", "binary":
-		req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
-	}
+	req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
 
 	if err != nil {
+		if errors.Is(err, mime.ErrInvalidMediaParameter) {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: read data from the request failed",
 			zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -127,8 +129,6 @@ func (h *DataHandler) HandleDataValue(w http.ResponseWriter, r *http.Request) {
 // HandleDataUpdate updates the requested data in storage.
 func (h *DataHandler) HandleDataUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// var req data.Data
-	// var buf bytes.Buffer
 
 	userID, err := utils.GetUserIDFromContext(ctx)
 	idString := strconv.Itoa(userID)
@@ -145,33 +145,19 @@ func (h *DataHandler) HandleDataUpdate(w http.ResponseWriter, r *http.Request) {
 		Name:   chi.URLParam(r, "dataName"),
 	}
 
-	switch req.Type {
-	case "text", "binary":
-		req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
-	}
+	req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
 
 	if err != nil {
+		if errors.Is(err, mime.ErrInvalidMediaParameter) {
+			w.WriteHeader(http.StatusBadRequest)
+
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: read data from the request failed",
 			zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	// _, err = buf.ReadFrom(r.Body)
-	// if err != nil {
-	// 	logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: read request body failed",
-	// 		zap.Error(err))
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
-	// defer r.Body.Close()
-
-	// err = json.Unmarshal(buf.Bytes(), &req)
-	// if err != nil {
-	// 	logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: unmarshal data failed")
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
 
 	err = h.Service.Edit(ctx, req)
 	if err != nil {
