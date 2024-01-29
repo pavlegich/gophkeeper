@@ -59,7 +59,7 @@ func Run() error {
 	// add form field
 
 	metaPart, _ := multipartWriter.CreateFormField("metadata")
-	meta, err := json.Marshal(map[string]string{"multipart": "first"})
+	meta, err := json.Marshal(map[string]string{"multipart": "second"})
 	if err != nil {
 		log.Println(err)
 	}
@@ -69,9 +69,9 @@ func Run() error {
 	if err != nil {
 		log.Println(err)
 	}
-	textPart.Write([]byte("hello from text mulipart client"))
+	textPart.Write([]byte("hello another"))
 
-	create := "/data/binary/clientNotMetadataType"
+	create := "/data/binary/oneFunc"
 
 	// d := data.Data{
 	// 	Name: "clientData",
@@ -87,7 +87,7 @@ func Run() error {
 	// 	log.Println(err)
 	// }
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target+create, &buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, target+create, &buf)
 	if err != nil {
 		log.Println(err)
 	}

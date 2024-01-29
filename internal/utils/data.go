@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -20,12 +21,12 @@ func IsValidDataType(t string) bool {
 	return false
 }
 
-// GetMultipartData reads multipart fields from the request and returns
+// GetMultipartDataFromRequest reads multipart fields from the request and returns
 // the data object with the obtained multipart data.
-func GetMultipartData(r *http.Request, d *data.Data) (*data.Data, error) {
+func GetMultipartDataFromRequest(ctx context.Context, r *http.Request, d *data.Data) (*data.Data, error) {
 	mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
-		return nil, fmt.Errorf("GetMultipartData: couldn't get media type %w", err)
+		return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't get media type %w", err)
 	}
 
 	multiparted := d
@@ -40,7 +41,7 @@ func GetMultipartData(r *http.Request, d *data.Data) (*data.Data, error) {
 				if errors.Is(err, io.EOF) {
 					break
 				}
-				return nil, fmt.Errorf("GetMultipartData: get next multi part failed %w", err)
+				return nil, fmt.Errorf("GetMultipartDataFromRequest: get next multi part failed %w", err)
 			}
 			defer field.Close()
 
@@ -49,12 +50,12 @@ func GetMultipartData(r *http.Request, d *data.Data) (*data.Data, error) {
 			case "data":
 				multiparted.Data, err = io.ReadAll(field)
 				if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-					return nil, fmt.Errorf("GetMultipartData: couldn't read data from the field data %w", err)
+					return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't read data from the field data %w", err)
 				}
 			case "metadata":
 				multiparted.Metadata, err = io.ReadAll(field)
 				if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-					return nil, fmt.Errorf("GetMultipartData: couldn't read data from the field metadata %w", err)
+					return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't read data from the field metadata %w", err)
 				}
 			}
 		}

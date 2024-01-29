@@ -4,16 +4,10 @@
 package http
 
 import (
-	"bytes"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"io"
-	"mime"
-	"mime/multipart"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
@@ -46,7 +40,7 @@ func newHandler(r *chi.Mux, cfg *config.ServerConfig, s data.Service) {
 	}
 	r.Post("/api/user/data/{dataType}/{dataName}", h.HandleDataUpload)
 	r.Get("/api/user/data/{dataType}/{dataName}", h.HandleDataValue)
-	r.Put("/api/user/data", h.HandleDataUpdate)
+	r.Put("/api/user/data/{dataType}/{dataName}", h.HandleDataUpdate)
 	r.Delete("/api/user/data/{dataType}/{dataName}", h.HandleDataDelete)
 }
 
@@ -57,71 +51,31 @@ func (h *DataHandler) HandleDataUpload(w http.ResponseWriter, r *http.Request) {
 	userID, err := utils.GetUserIDFromContext(ctx)
 	idString := strconv.Itoa(userID)
 	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: get user id from context failed")
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: get user id from context failed",
+			zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	req := data.Data{
+	req := &data.Data{
 		UserID: userID,
 		Type:   chi.URLParam(r, "dataType"),
 		Name:   chi.URLParam(r, "dataName"),
 	}
 
-	mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	switch req.Type {
+	case "text", "binary":
+		req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
+	}
+
 	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: read request media type failed",
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: read data from the request failed",
 			zap.Error(err))
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	switch req.Type {
-	case "text", "binary":
-		if strings.HasPrefix(mediaType, "multipart/") {
-			multipartReader := multipart.NewReader(r.Body, params["boundary"])
-			defer r.Body.Close()
-
-			for {
-				field, err := multipartReader.NextPart()
-				if err != nil {
-					if errors.Is(err, io.EOF) {
-						break
-					}
-					logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: get next multi part failed",
-						zap.Error(err))
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-				defer field.Close()
-
-				// pay attention to read large file
-				switch field.FormName() {
-				case "data":
-					req.Data, err = io.ReadAll(field)
-					if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-						logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: couldn't read data from the field data",
-							zap.Error(err))
-						w.WriteHeader(http.StatusInternalServerError)
-						return
-					}
-				case "metadata":
-					req.Metadata, err = io.ReadAll(field)
-					if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-						logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpload: couldn't read data from the field metadata",
-							zap.Error(err))
-						w.WriteHeader(http.StatusInternalServerError)
-						return
-					}
-				}
-			}
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	}
-
-	err = h.Service.Create(ctx, &req)
+	err = h.Service.Create(ctx, req)
 	if err != nil {
 		if errors.Is(err, errs.ErrDataAlreadyUpload) {
 			w.WriteHeader(http.StatusConflict)
@@ -147,7 +101,8 @@ func (h *DataHandler) HandleDataValue(w http.ResponseWriter, r *http.Request) {
 	userID, err := utils.GetUserIDFromContext(ctx)
 	idString := strconv.Itoa(userID)
 	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataValue: get user id from context failed")
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataValue: get user id from context failed",
+			zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -172,36 +127,53 @@ func (h *DataHandler) HandleDataValue(w http.ResponseWriter, r *http.Request) {
 // HandleDataUpdate updates the requested data in storage.
 func (h *DataHandler) HandleDataUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	var req data.Data
-	var buf bytes.Buffer
+	// var req data.Data
+	// var buf bytes.Buffer
 
 	userID, err := utils.GetUserIDFromContext(ctx)
 	idString := strconv.Itoa(userID)
 	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: get user id from context failed")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	_, err = buf.ReadFrom(r.Body)
-	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: read request body failed",
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: get user id from context failed",
 			zap.Error(err))
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	err = json.Unmarshal(buf.Bytes(), &req)
-	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: unmarshal data failed")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	req.UserID = userID
+	req := &data.Data{
+		UserID: userID,
+		Type:   chi.URLParam(r, "dataType"),
+		Name:   chi.URLParam(r, "dataName"),
+	}
 
-	err = h.Service.Edit(ctx, &req)
+	switch req.Type {
+	case "text", "binary":
+		req, err = utils.GetMultipartDataFromRequest(ctx, r, req)
+	}
+
+	if err != nil {
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: read data from the request failed",
+			zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// _, err = buf.ReadFrom(r.Body)
+	// if err != nil {
+	// 	logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: read request body failed",
+	// 		zap.Error(err))
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
+	// defer r.Body.Close()
+
+	// err = json.Unmarshal(buf.Bytes(), &req)
+	// if err != nil {
+	// 	logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: unmarshal data failed")
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+
+	err = h.Service.Edit(ctx, req)
 	if err != nil {
 		if errors.Is(err, errs.ErrDataNotFound) {
 			w.WriteHeader(http.StatusNoContent)
@@ -226,7 +198,8 @@ func (h *DataHandler) HandleDataDelete(w http.ResponseWriter, r *http.Request) {
 	userID, err := utils.GetUserIDFromContext(ctx)
 	idString := strconv.Itoa(userID)
 	if err != nil {
-		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: get user id from context failed")
+		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataUpdate: get user id from context failed",
+			zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
