@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS data (
     name varchar(64),
     data_type data_type,
     data bytea,
-    created_at timestamp DEFAULT NOW(),
-    metadata text
+    metadata jsonb,
+    created_at timestamp DEFAULT NOW()
 );
 
 -- create indexes

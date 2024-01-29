@@ -18,7 +18,7 @@ type Service interface {
 	Login(ctx context.Context, user *User) (*User, error)
 }
 
-// Service describes methods related with user
+// Repository describes methods related with user
 // for communication between services and database.
 type Repository interface {
 	GetUserByLogin(ctx context.Context, login string) (*User, error)

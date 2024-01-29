@@ -8,17 +8,19 @@ import (
 	"time"
 )
 
-// Data contains
+// Data contains data of data object.
 type Data struct {
 	ID        int       `db:"id" json:"id"`
 	UserID    int       `db:"user_id" json:"user_id"`
 	Name      string    `db:"name" json:"name"`
 	Type      string    `db:"type" json:"type"`
-	Data      string    `db:"data" json:"data"`
-	Metadata  string    `db:"metadata" json:"metadata"`
+	Data      []byte    `db:"data" json:"data"`
+	Metadata  []byte    `db:"metadata" json:"metadata"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
 
+// Service describes methods related with data object
+// for communication between handlers and repositories.
 type Service interface {
 	Create(ctx context.Context, data *Data) error
 	Unload(ctx context.Context, dType string, name string) (*Data, error)
@@ -26,6 +28,8 @@ type Service interface {
 	Delete(ctx context.Context, dType string, name string) error
 }
 
+// Repository describes methods related with data object
+// for communication between services and database.
 type Repository interface {
 	GetDataByName(ctx context.Context, dType string, name string) (*Data, error)
 	CreateData(ctx context.Context, data *Data) error

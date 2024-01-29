@@ -61,7 +61,7 @@ func (r *Repository) GetDataByName(ctx context.Context, dType string, name strin
 }
 
 // CreateData saves new data object into the storage.
-func (r *Repository) CreateData(ctx context.Context, data *data.Data) error {
+func (r *Repository) CreateData(ctx context.Context, d *data.Data) error {
 	err := r.db.PingContext(ctx)
 	if err != nil {
 		return fmt.Errorf("CreateData: connection to database in died %w", err)
@@ -74,7 +74,7 @@ func (r *Repository) CreateData(ctx context.Context, data *data.Data) error {
 	defer tx.Rollback()
 
 	row := tx.QueryRowContext(ctx, `SELECT id FROM data WHERE user_id = $1 AND name = $2 
-	AND data_type = $3`, data.UserID, data.Name, data.Type)
+	AND data_type = $3`, d.UserID, d.Name, d.Type)
 	var id int
 	if err := row.Scan(&id); !errors.Is(err, sql.ErrNoRows) {
 		if err == nil {
@@ -84,7 +84,7 @@ func (r *Repository) CreateData(ctx context.Context, data *data.Data) error {
 	}
 
 	_, err = tx.ExecContext(ctx, `INSERT INTO data (user_id, name, data_type, data, metadata) 
-	VALUES ($1, $2, $3, $4, $5)`, data.UserID, data.Name, data.Type, data.Data, data.Metadata)
+	VALUES ($1, $2, $3, $4, $5)`, d.UserID, d.Name, d.Type, d.Data, d.Metadata)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -103,7 +103,7 @@ func (r *Repository) CreateData(ctx context.Context, data *data.Data) error {
 }
 
 // UpdateData updates user data in storage.
-func (r *Repository) UpdateData(ctx context.Context, data *data.Data) error {
+func (r *Repository) UpdateData(ctx context.Context, d *data.Data) error {
 	err := r.db.PingContext(ctx)
 	if err != nil {
 		return fmt.Errorf("UpdateData: connection to database in died %w", err)
@@ -111,7 +111,7 @@ func (r *Repository) UpdateData(ctx context.Context, data *data.Data) error {
 
 	res, err := r.db.ExecContext(ctx, `UPDATE data SET data = $1, metadata = $2 
 	WHERE user_id = $3 AND name = $4 AND data_type = $5`,
-		data.Data, data.Metadata, data.UserID, data.Name, data.Type)
+		d.Data, d.Metadata, d.UserID, d.Name, d.Type)
 	if err != nil {
 		return fmt.Errorf("UpdateData: update table failed %w", err)
 	}

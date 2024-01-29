@@ -166,6 +166,5 @@ func (h *UserHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		MaxAge:   -1,
 	})
-
 	w.WriteHeader(http.StatusOK)
 }
