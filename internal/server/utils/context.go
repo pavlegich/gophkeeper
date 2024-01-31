@@ -1,4 +1,4 @@
-// Package utils contains methods for interacting with context objects.
+// Package utils contains additional methods for server.
 package utils
 
 import (

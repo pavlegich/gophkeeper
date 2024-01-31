@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pavlegich/gophkeeper/internal/server/domains/data"
 	errs "github.com/pavlegich/gophkeeper/internal/server/errors"
-	"github.com/pavlegich/gophkeeper/internal/utils"
+	"github.com/pavlegich/gophkeeper/internal/server/utils"
 )
 
 // Repository contains storage objects.
@@ -21,7 +21,7 @@ type Repository struct {
 }
 
 // NewDataRepository returns new repository object.
-func NewDataRepository(db *sql.DB) *Repository {
+func NewDataRepository(ctx context.Context, db *sql.DB) *Repository {
 	return &Repository{
 		db: db,
 	}

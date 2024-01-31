@@ -11,7 +11,7 @@ type DataService struct {
 }
 
 // NewDataService returns new data service.
-func NewDataService(repo Repository) *DataService {
+func NewDataService(ctx context.Context, repo Repository) *DataService {
 	return &DataService{
 		repo: repo,
 	}

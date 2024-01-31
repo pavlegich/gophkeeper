@@ -1,5 +1,5 @@
 // Package handlers contains server controller object and
-// methods for building the server.
+// methods for building the server route.
 package handlers
 
 import (
@@ -20,7 +20,7 @@ type Controller struct {
 	cfg *config.ServerConfig
 }
 
-// NewController returns new server controller.
+// NewController creates and returns new server controller.
 func NewController(ctx context.Context, db *sql.DB, cfg *config.ServerConfig) *Controller {
 	return &Controller{
 		db:  db,
@@ -36,8 +36,8 @@ func (c *Controller) BuildRoute(ctx context.Context) (*chi.Mux, error) {
 	r.Use(middlewares.WithAuth(c.cfg.Token))
 	r.Use(middlewares.WithCompress)
 
-	users.Activate(r, c.cfg, c.db)
-	data.Activate(r, c.cfg, c.db)
+	users.Activate(ctx, r, c.cfg, c.db)
+	data.Activate(ctx, r, c.cfg, c.db)
 
 	return r, nil
 }

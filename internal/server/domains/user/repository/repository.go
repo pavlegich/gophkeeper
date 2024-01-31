@@ -20,7 +20,7 @@ type Repository struct {
 }
 
 // NewUserRepository returns new repository object.
-func NewUserRepository(db *sql.DB) *Repository {
+func NewUserRepository(ctx context.Context, db *sql.DB) *Repository {
 	return &Repository{
 		db: db,
 	}

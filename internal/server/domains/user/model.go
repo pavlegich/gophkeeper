@@ -1,5 +1,5 @@
 // Package user contains objects and methods
-// for user registration, login nad authorization.
+// for user registration, login and authorization.
 package user
 
 import "context"

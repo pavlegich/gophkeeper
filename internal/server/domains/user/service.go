@@ -14,7 +14,7 @@ type UserService struct {
 }
 
 // NewUserService returns new user service.
-func NewUserService(repo Repository) *UserService {
+func NewUserService(ctx context.Context, repo Repository) *UserService {
 	return &UserService{
 		repo: repo,
 	}

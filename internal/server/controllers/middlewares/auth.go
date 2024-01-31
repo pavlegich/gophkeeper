@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/pavlegich/gophkeeper/internal/infra/hash"
-	"github.com/pavlegich/gophkeeper/internal/utils"
+	"github.com/pavlegich/gophkeeper/internal/server/utils"
 )
 
 // WithAuth checks and validates authorization token.

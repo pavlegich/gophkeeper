@@ -22,7 +22,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Run initialized the main app components and runs the server.
+// Run initializes the main app components and runs the server.
 func Run() error {
 	// Context
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
@@ -73,15 +73,18 @@ func Run() error {
 	// Server graceful shutdown
 	go func() {
 		<-ctx.Done()
-		ctxShutdown, cancelShutdown := context.WithTimeout(ctx, 5*time.Second)
-		defer cancelShutdown()
+		if ctx.Err() != nil {
+			ctxShutdown, cancelShutdown := context.WithTimeout(ctx, 5*time.Second)
+			defer cancelShutdown()
 
-		logger.Log.Info("shutting down gracefully...")
+			logger.Log.Info("shutting down gracefully...",
+				zap.Error(ctx.Err()))
 
-		err := srv.Shutdown(ctxShutdown)
-		if err != nil {
-			logger.Log.Error("server shutdown failed",
-				zap.Error(err))
+			err := srv.Shutdown(ctxShutdown)
+			if err != nil {
+				logger.Log.Error("server shutdown failed",
+					zap.Error(err))
+			}
 		}
 	}()
 

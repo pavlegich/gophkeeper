@@ -5,6 +5,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -27,13 +28,13 @@ type UserHandler struct {
 }
 
 // Activate activates handler for user.
-func Activate(r *chi.Mux, cfg *config.ServerConfig, db *sql.DB) {
-	s := user.NewUserService(repo.NewUserRepository(db))
-	newHandler(r, cfg, s)
+func Activate(ctx context.Context, r *chi.Mux, cfg *config.ServerConfig, db *sql.DB) {
+	s := user.NewUserService(ctx, repo.NewUserRepository(ctx, db))
+	newHandler(ctx, r, cfg, s)
 }
 
 // newHandler initializes handler for user.
-func newHandler(r *chi.Mux, cfg *config.ServerConfig, s user.Service) {
+func newHandler(ctx context.Context, r *chi.Mux, cfg *config.ServerConfig, s user.Service) {
 	h := &UserHandler{
 		Config:  cfg,
 		Service: s,
@@ -126,7 +127,7 @@ func (h *UserHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	currentUser, err := h.Service.Login(ctx, &req)
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
-			w.WriteHeader(http.StatusUnauthorized)
+			w.WriteHeader(http.StatusNoContent)
 		} else if errors.Is(err, errs.ErrPasswordNotMatch) {
 			w.WriteHeader(http.StatusUnauthorized)
 		} else {

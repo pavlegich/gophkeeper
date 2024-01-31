@@ -38,7 +38,7 @@ func (s *Server) GetAddress(ctx context.Context) string {
 	return s.config.Address
 }
 
-// Serve start listening the network by the server.
+// Serve starts listening the network by the server.
 func (s *Server) Serve(ctx context.Context) error {
 	return s.server.ListenAndServe()
 }

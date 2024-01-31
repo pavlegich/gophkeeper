@@ -4,6 +4,7 @@
 package http
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"mime"
@@ -16,7 +17,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/server/domains/data"
 	repo "github.com/pavlegich/gophkeeper/internal/server/domains/data/repository"
 	errs "github.com/pavlegich/gophkeeper/internal/server/errors"
-	"github.com/pavlegich/gophkeeper/internal/utils"
+	"github.com/pavlegich/gophkeeper/internal/server/utils"
 	"go.uber.org/zap"
 )
 
@@ -28,13 +29,13 @@ type DataHandler struct {
 }
 
 // Activate activates handler for data object.
-func Activate(r *chi.Mux, cfg *config.ServerConfig, db *sql.DB) {
-	s := data.NewDataService(repo.NewDataRepository(db))
-	newHandler(r, cfg, s)
+func Activate(ctx context.Context, r *chi.Mux, cfg *config.ServerConfig, db *sql.DB) {
+	s := data.NewDataService(ctx, repo.NewDataRepository(ctx, db))
+	newHandler(ctx, r, cfg, s)
 }
 
 // newHandler initializes handler for data object.
-func newHandler(r *chi.Mux, cfg *config.ServerConfig, s data.Service) {
+func newHandler(ctx context.Context, r *chi.Mux, cfg *config.ServerConfig, s data.Service) {
 	h := &DataHandler{
 		Config:  cfg,
 		Service: s,
@@ -92,7 +93,7 @@ func (h *DataHandler) HandleDataUpload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// HandleDataValue writes requested data in response body
+// HandleDataValue writes requested data into response body
 // if this data found in storage successfuly.
 func (h *DataHandler) HandleDataValue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
