@@ -35,7 +35,7 @@ func main() {
 	rw := rwmanager.NewRWManager(ctx, os.Stdin, os.Stdout)
 
 	// Versions
-	rw.Write(ctx, "Build version: "+buildVersion)
+	rw.WriteString(ctx, "Build version: "+buildVersion)
 	rw.WriteString(ctx, "Build date: "+buildDate)
 	rw.WriteString(ctx, "Build commit: "+buildCommit)
 
@@ -87,10 +87,12 @@ func main() {
 
 		select {
 		case <-connsClosed:
-		case <-time.After(15 * time.Second):
-			panic("shutdown timeout")
+		case <-time.After(5 * time.Second):
+			rw.WriteString(ctx, "\n"+utils.UnexpectedQuit)
+			return
+			// panic("shutdown timeout")
 		}
 	}
 
-	rw.Write(ctx, utils.Quit)
+	rw.WriteString(ctx, utils.Quit)
 }

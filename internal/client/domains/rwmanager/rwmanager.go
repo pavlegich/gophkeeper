@@ -36,11 +36,8 @@ func NewRWManager(ctx context.Context, in *os.File, out *os.File) RWService {
 func (m *RWManager) Read(ctx context.Context) (string, error) {
 	var in string
 	_, err := fmt.Fscanln(m.reader, &in)
-	if err != nil {
+	if err != nil && len(in) != 0 {
 		return "", fmt.Errorf("Read: read string from input failed %w", err)
-	}
-	if len(in) == 0 {
-		return "", fmt.Errorf("Read: input is empty")
 	}
 	return in, nil
 }
@@ -57,7 +54,7 @@ func (m *RWManager) Write(ctx context.Context, out string) error {
 
 // WriteString writes the requested text into the output from the new line.
 func (m *RWManager) WriteString(ctx context.Context, out string) error {
-	_, err := fmt.Fprintf(m.writer, "\n%s", out)
+	_, err := fmt.Fprintf(m.writer, "%s\n", out)
 	if err != nil {
 		return fmt.Errorf("WriteString: print into the output failed %w", err)
 	}

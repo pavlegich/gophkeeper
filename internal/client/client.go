@@ -36,10 +36,11 @@ func (c *Client) Serve(ctx context.Context) error {
 		default:
 			err := c.controller.HandleCommand(ctx)
 			if err != nil {
-				if !utils.IsKnownAndNotExitErr(err) {
+				got := utils.GetKnownErr(err)
+				if got == nil {
 					return fmt.Errorf("Serve: handle command failed %w", err)
 				}
-				c.rw.WriteString(ctx, err.Error())
+				c.rw.WriteString(ctx, got.Error())
 			}
 		}
 	}

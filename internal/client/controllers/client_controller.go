@@ -10,6 +10,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/user"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
+	"github.com/pavlegich/gophkeeper/internal/client/utils"
 	"github.com/pavlegich/gophkeeper/internal/infra/config"
 )
 
@@ -33,7 +34,7 @@ func NewController(ctx context.Context, rw rwmanager.RWService, cfg *config.Clie
 
 // HandleCommand handles commands from the input, selects and does the requested action.
 func (c *Controller) HandleCommand(ctx context.Context) error {
-	c.rw.WriteString(ctx, "Type the command (or exit): ")
+	c.rw.Write(ctx, "Type the command (or exit): ")
 	act, err := c.rw.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("HandleCommand: read command failed %w", err)
@@ -42,14 +43,19 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 
 	switch strings.ToLower(commands[0]) {
 	case "register":
-		err := c.user.Register(ctx)
+		err := utils.DoWithRetryIfEmpty(ctx, c.user.Register)
 		if err != nil {
 			return fmt.Errorf("HandleCommand: register user failed %w", err)
+		}
+	case "login":
+		err := utils.DoWithRetryIfEmpty(ctx, c.user.Login)
+		if err != nil {
+			return fmt.Errorf("HandleCommand: login user failed %w", err)
 		}
 	case "exit":
 		return fmt.Errorf("NewClient: %w", errs.ErrExit)
 	default:
-		return fmt.Errorf("NewClient: unknown command")
+		return fmt.Errorf("NewClient: %w", errs.ErrUknownCommand)
 	}
 	return nil
 }

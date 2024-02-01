@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"syscall"
 	"time"
+
+	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 )
 
 // CheckStatusCode checks status code and returns the answer.
@@ -15,15 +17,15 @@ func CheckStatusCode(code int) error {
 	case http.StatusOK:
 		return nil
 	case http.StatusBadRequest, http.StatusUnauthorized:
-		return fmt.Errorf("please, check the entry and try again")
+		return errs.ErrBadRequest
 	case http.StatusConflict:
-		return fmt.Errorf("already exists")
+		return errs.ErrAlreadyExists
 	case http.StatusInternalServerError:
-		return fmt.Errorf("server failure, try again")
+		return errs.ErrServerInternal
 	case http.StatusNoContent:
-		return fmt.Errorf("not exist")
+		return errs.ErrNotExist
 	default:
-		return fmt.Errorf("status code: %d", code)
+		return fmt.Errorf("%w %d", errs.ErrUnknownStatusCode, code)
 	}
 }
 
