@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"syscall"
 
@@ -16,10 +17,8 @@ const (
 	UnexpectedQuit = "unexpected quit"
 )
 
+// GetKnownErr checks the error and returns it, if it is known.
 func GetKnownErr(err error) error {
-	if errors.Is(err, errs.ErrUknownCommand) {
-		return errs.ErrUknownCommand
-	}
 	if errors.Is(err, errs.ErrBadRequest) {
 		return errs.ErrBadRequest
 	}
@@ -38,8 +37,23 @@ func GetKnownErr(err error) error {
 	if errors.Is(err, errs.ErrEmptyInput) {
 		return errs.ErrEmptyInput
 	}
+	if errors.Is(err, errs.ErrUnauthorized) {
+		return errs.ErrUnauthorized
+	}
 	if errors.Is(err, syscall.ECONNREFUSED) {
 		return errs.ErrConnectionRefused
 	}
 	return nil
+}
+
+// DoWithRetryIfUnknown tries to implement function three times, if the input is empty.
+func DoWithRetryIfUnknown(ctx context.Context, f func(ctx context.Context) error) error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = f(ctx)
+		if !errors.Is(err, errs.ErrUnknownCommand) {
+			return err
+		}
+	}
+	return err
 }

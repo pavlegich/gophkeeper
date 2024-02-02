@@ -14,7 +14,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
 )
 
-// UserService contatins objects for user service.
+// UserService contains objects for user service.
 type UserService struct {
 	rw  rwmanager.RWService
 	cfg *config.ClientConfig

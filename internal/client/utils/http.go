@@ -16,8 +16,10 @@ func CheckStatusCode(code int) error {
 	switch code {
 	case http.StatusOK:
 		return nil
-	case http.StatusBadRequest, http.StatusUnauthorized:
+	case http.StatusBadRequest:
 		return errs.ErrBadRequest
+	case http.StatusUnauthorized:
+		return errs.ErrUnauthorized
 	case http.StatusConflict:
 		return errs.ErrAlreadyExists
 	case http.StatusInternalServerError:

@@ -3,10 +3,12 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/pavlegich/gophkeeper/internal/client/controllers"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
+	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
 	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
 )
@@ -34,9 +36,12 @@ func (c *Client) Serve(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		default:
-			err := c.controller.HandleCommand(ctx)
+			err := utils.DoWithRetryIfUnknown(ctx, c.controller.HandleCommand)
 			if err != nil {
 				got := utils.GetKnownErr(err)
+				if errors.Is(err, errs.ErrUnknownCommand) {
+					c.rw.WriteString(ctx, errs.ErrUnknownCommand.Error())
+				}
 				if got == nil {
 					return fmt.Errorf("Serve: handle command failed %w", err)
 				}

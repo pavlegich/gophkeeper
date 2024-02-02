@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pavlegich/gophkeeper/internal/client/domains/data"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/user"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
@@ -19,16 +20,19 @@ type Controller struct {
 	rw   rwmanager.RWService
 	cfg  *config.ClientConfig
 	user user.Service
+	data data.Service
 }
 
 // NewController creates and returns new client controller.
 func NewController(ctx context.Context, rw rwmanager.RWService, cfg *config.ClientConfig) *Controller {
 	userService := user.NewUserService(ctx, rw, cfg)
+	dataService := data.NewDataService(ctx, rw, cfg)
 
 	return &Controller{
 		rw:   rw,
 		cfg:  cfg,
 		user: userService,
+		data: dataService,
 	}
 }
 
@@ -39,9 +43,8 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("HandleCommand: read command failed %w", err)
 	}
-	commands := strings.Split(act, " ")
 
-	switch strings.ToLower(commands[0]) {
+	switch strings.ToLower(act) {
 	case "register":
 		err := utils.DoWithRetryIfEmpty(ctx, c.user.Register)
 		if err != nil {
@@ -52,10 +55,15 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("HandleCommand: login user failed %w", err)
 		}
+	case "create":
+		err := c.data.Create(ctx)
+		if err != nil {
+			return fmt.Errorf("HandleCommand: create data failed %w", err)
+		}
 	case "exit":
-		return fmt.Errorf("NewClient: %w", errs.ErrExit)
+		return fmt.Errorf("HandleCommand: %w", errs.ErrExit)
 	default:
-		return fmt.Errorf("NewClient: %w", errs.ErrUknownCommand)
+		return fmt.Errorf("HandleCommand: %w", errs.ErrUnknownCommand)
 	}
 	return nil
 }
