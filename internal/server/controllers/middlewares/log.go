@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"go.uber.org/zap"
 )
 

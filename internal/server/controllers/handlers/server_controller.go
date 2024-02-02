@@ -7,7 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/pavlegich/gophkeeper/internal/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
 	"github.com/pavlegich/gophkeeper/internal/server/controllers/middlewares"
 	data "github.com/pavlegich/gophkeeper/internal/server/domains/data/controllers/http"
 	users "github.com/pavlegich/gophkeeper/internal/server/domains/user/controllers/http"

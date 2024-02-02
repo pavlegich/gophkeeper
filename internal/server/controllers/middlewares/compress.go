@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	compress "github.com/pavlegich/gophkeeper/internal/infra/compress/gzip"
+	compress "github.com/pavlegich/gophkeeper/internal/common/infra/compress/gzip"
 )
 
 // WithCompress handles with logging.

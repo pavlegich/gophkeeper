@@ -2,7 +2,7 @@
 package main
 
 import (
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"github.com/pavlegich/gophkeeper/internal/server/app"
 	"go.uber.org/zap"
 )

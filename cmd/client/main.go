@@ -13,8 +13,8 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/controllers"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
-	"github.com/pavlegich/gophkeeper/internal/infra/config"
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"go.uber.org/zap"
 )
 

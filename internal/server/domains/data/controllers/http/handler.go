@@ -12,8 +12,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/pavlegich/gophkeeper/internal/infra/config"
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"github.com/pavlegich/gophkeeper/internal/server/domains/data"
 	repo "github.com/pavlegich/gophkeeper/internal/server/domains/data/repository"
 	errs "github.com/pavlegich/gophkeeper/internal/server/errors"

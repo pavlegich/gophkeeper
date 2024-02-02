@@ -12,8 +12,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/pavlegich/gophkeeper/internal/infra/config"
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"github.com/pavlegich/gophkeeper/internal/server/domains/user"
 	repo "github.com/pavlegich/gophkeeper/internal/server/domains/user/repository"
 	errs "github.com/pavlegich/gophkeeper/internal/server/errors"

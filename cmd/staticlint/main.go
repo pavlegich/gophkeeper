@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/fatih/errwrap/errwrap"
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"github.com/timakin/bodyclose/passes/bodyclose"
 	"go.uber.org/zap"
 	"golang.org/x/tools/go/analysis"

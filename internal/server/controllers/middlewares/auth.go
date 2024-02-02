@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/pavlegich/gophkeeper/internal/infra/hash"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/hash"
 	"github.com/pavlegich/gophkeeper/internal/server/utils"
 )
 

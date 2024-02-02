@@ -11,7 +11,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
-	"github.com/pavlegich/gophkeeper/internal/infra/config"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
 )
 
 // UserService contatins objects for user service.

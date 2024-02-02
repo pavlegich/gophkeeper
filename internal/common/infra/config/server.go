@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/caarlos0/env/v6"
-	"github.com/pavlegich/gophkeeper/internal/infra/hash"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/hash"
 )
 
 // ServerConfig contains values of server flags and environments.

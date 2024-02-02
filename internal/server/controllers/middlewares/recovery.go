@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/pavlegich/gophkeeper/internal/infra/logger"
+	"github.com/pavlegich/gophkeeper/internal/common/infra/logger"
 	"go.uber.org/zap"
 )
 
