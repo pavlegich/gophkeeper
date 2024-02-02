@@ -23,7 +23,6 @@ type RWManager struct {
 // and writing data to the output.
 type RWService interface {
 	Read(ctx context.Context) (string, error)
-	ReadTwoWords(ctx context.Context) (string, error)
 	Write(ctx context.Context, out string) error
 	WriteString(ctx context.Context, out string) error
 }
@@ -38,8 +37,8 @@ func NewRWManager(ctx context.Context, in *os.File, out *os.File) RWService {
 
 // Read reads data from the input and returns it.
 func (m *RWManager) Read(ctx context.Context) (string, error) {
-	var in string
-	_, err := fmt.Fscanln(m.reader, &in)
+	in, err := m.reader.ReadString('\n')
+	in = strings.TrimRight(in, "\n")
 	if len(in) == 0 {
 		return "", fmt.Errorf("Read: %w", errs.ErrEmptyInput)
 	}
@@ -47,16 +46,6 @@ func (m *RWManager) Read(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("Read: read string from input failed %w", err)
 	}
 	return in, nil
-}
-
-// ReadTwoWords reads two words from the input string, returns the string value with these words.
-func (m *RWManager) ReadTwoWords(ctx context.Context) (string, error) {
-	in := make([]string, 2)
-	_, err := fmt.Fscanf(m.reader, "%s %s\n", &in[0], &in[1])
-	if err != nil {
-		return "", fmt.Errorf("ReadN: read from input failed %w", err)
-	}
-	return strings.Join(in, " "), nil
 }
 
 // Write writes the requested text into the output.

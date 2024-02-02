@@ -15,12 +15,13 @@ const (
 	Quit           = "quit"
 	Success        = "success"
 	Exit           = "exit"
+	Close          = "close"
 	UnexpectedQuit = "unexpected quit"
 )
 
 // GetKnownErr checks the error and returns it, if it is known.
 func GetKnownErr(err error) error {
-	if errors.Is(err, errs.ErrBadRequest) {
+	if errors.Is(err, errs.ErrBadRequest) || errors.Is(err, errs.ErrUnknownStatusCode) {
 		return errs.ErrBadRequest
 	}
 	if errors.Is(err, errs.ErrAlreadyExists) {
@@ -31,9 +32,6 @@ func GetKnownErr(err error) error {
 	}
 	if errors.Is(err, errs.ErrNotExist) {
 		return errs.ErrNotExist
-	}
-	if errors.Is(err, errs.ErrUnknownStatusCode) {
-		return errs.ErrUnknownStatusCode
 	}
 	if errors.Is(err, errs.ErrEmptyInput) {
 		return errs.ErrEmptyInput
@@ -55,6 +53,9 @@ func GetKnownErr(err error) error {
 	}
 	if errors.Is(err, errs.ErrInvalidCardCV) {
 		return errs.ErrInvalidCardCV
+	}
+	if errors.Is(err, errs.ErrInvalidMetadata) {
+		return errs.ErrInvalidMetadata
 	}
 	return nil
 }

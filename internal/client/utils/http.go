@@ -27,13 +27,13 @@ func CheckStatusCode(code int) error {
 	case http.StatusNoContent:
 		return errs.ErrNotExist
 	default:
-		return fmt.Errorf("%w %d", errs.ErrUnknownStatusCode, code)
+		return fmt.Errorf("%w%d", errs.ErrUnknownStatusCode, code)
 	}
 }
 
-// GetRequestWithRetry requests with retries.
+// DoRequestWithRetry requests with retries.
 // If request is successful, returns response.
-func GetRequestWithRetry(ctx context.Context, r *http.Request) (*http.Response, error) {
+func DoRequestWithRetry(ctx context.Context, r *http.Request) (*http.Response, error) {
 	var err error = nil
 	var resp *http.Response
 	intervals := []time.Duration{0, time.Second, 3 * time.Second, 5 * time.Second}

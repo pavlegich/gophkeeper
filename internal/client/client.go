@@ -37,7 +37,7 @@ func (c *Client) Serve(ctx context.Context) error {
 			return nil
 		default:
 			err := utils.DoWithRetryIfUnknown(ctx, c.controller.HandleCommand)
-			if err != nil {
+			if err != nil && !errors.Is(err, errs.ErrEmptyInput) {
 				got := utils.GetKnownErr(err)
 				if errors.Is(err, errs.ErrUnknownCommand) {
 					c.rw.WriteString(ctx, errs.ErrUnknownCommand.Error())

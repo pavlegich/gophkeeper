@@ -1,4 +1,6 @@
-package data
+// Package models contains objects for different data types
+// and methods for interacting with them.
+package models
 
 import (
 	"context"
@@ -51,7 +53,7 @@ func ReadCardDetails(ctx context.Context, rw rwmanager.RWService) ([]byte, error
 
 	// Read card owner
 	rw.Write(ctx, "Card owner: ")
-	c.Owner, err = rw.ReadTwoWords(ctx)
+	c.Owner, err = rw.Read(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrBadRequest)
 	}
@@ -70,7 +72,7 @@ func ReadCardDetails(ctx context.Context, rw rwmanager.RWService) ([]byte, error
 		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrInvalidCardCV)
 	}
 
-	data, err := json.Marshal(c)
+	data, err := json.MarshalIndent(c, "", "   ")
 	if err != nil {
 		return nil, fmt.Errorf("ReadCardDetails: marshal card details failed %w", err)
 	}

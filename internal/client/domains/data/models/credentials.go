@@ -1,4 +1,4 @@
-package data
+package models
 
 import (
 	"context"
@@ -27,7 +27,7 @@ func ReadCredentials(ctx context.Context, rw rwmanager.RWService) ([]byte, error
 		return nil, fmt.Errorf("ReadCredentials: couldn't read password %w", err)
 	}
 
-	data, err := json.Marshal(u)
+	data, err := json.MarshalIndent(u, "", "   ")
 	if err != nil {
 		return nil, fmt.Errorf("ReadCredentials: marshal credentials failed %w", err)
 	}

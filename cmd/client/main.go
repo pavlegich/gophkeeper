@@ -69,7 +69,10 @@ func main() {
 	// Run client
 	wg.Add(1)
 	go func() {
-		client.Serve(ctx)
+		err := client.Serve(ctx)
+		if err != nil {
+			logger.Log.Error("main: client serve error", zap.Error(err))
+		}
 		stop()
 		wg.Done()
 	}()

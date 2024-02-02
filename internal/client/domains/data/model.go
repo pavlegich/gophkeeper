@@ -14,8 +14,7 @@ type Data struct {
 
 // Service describes methods related with data object.
 type Service interface {
-	Create(ctx context.Context) error
-	Update(ctx context.Context) error
+	CreateOrUpdate(ctx context.Context, act string) error
 	GetValue(ctx context.Context) error
 	Delete(ctx context.Context) error
 }

@@ -88,7 +88,6 @@ func (r *Repository) CreateData(ctx context.Context, d *data.Data) error {
 
 	if err != nil {
 		var pgErr *pgconn.PgError
-		fmt.Println(pgErr.Code)
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
 			return fmt.Errorf("CreateUser: %w", errs.ErrDataAlreadyUpload)
 		}

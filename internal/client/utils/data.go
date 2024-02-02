@@ -1,5 +1,7 @@
 package utils
 
+import "strconv"
+
 // IsValidDataType checks whether the data type is correct.
 func IsValidDataType(t string) bool {
 	if t == "credentials" || t == "text" || t == "binary" || t == "card" {
@@ -11,6 +13,9 @@ func IsValidDataType(t string) bool {
 // IsValidCardNumber checks whether the bank card number
 // is valid using Luhn algorithm.
 func IsValidCardNumber(number int) bool {
+	if len(strconv.Itoa(number)) != 16 {
+		return false
+	}
 	return (number%10+checksum(number/10))%10 == 0
 }
 

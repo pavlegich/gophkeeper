@@ -8,6 +8,6 @@ var (
 	ErrAlreadyExists     = errors.New("already exists")
 	ErrServerInternal    = errors.New("server failure, try again")
 	ErrNotExist          = errors.New("not exist")
-	ErrUnknownStatusCode = errors.New("status code: ")
+	ErrUnknownStatusCode = errors.New("unknown status code")
 	ErrConnectionRefused = errors.New("server do not response, try again")
 )

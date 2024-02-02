@@ -57,11 +57,11 @@ func (s *UserService) Register(ctx context.Context) error {
 		return fmt.Errorf("Register: new request failed %w", err)
 	}
 
-	resp, err := utils.GetRequestWithRetry(ctx, req)
+	resp, err := utils.DoRequestWithRetry(ctx, req)
 	if err != nil {
 		return fmt.Errorf("Register: send request failed %w", err)
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 
 	err = utils.CheckStatusCode(resp.StatusCode)
 	if err != nil {
@@ -112,11 +112,11 @@ func (s *UserService) Login(ctx context.Context) error {
 		return fmt.Errorf("Login: new request failed %w", err)
 	}
 
-	resp, err := utils.GetRequestWithRetry(ctx, req)
+	resp, err := utils.DoRequestWithRetry(ctx, req)
 	if err != nil {
 		return fmt.Errorf("Login: send request failed %w", err)
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 
 	err = utils.CheckStatusCode(resp.StatusCode)
 	if err != nil {

@@ -39,13 +39,14 @@ func NewController(ctx context.Context, rw rwmanager.RWService, cfg *config.Clie
 
 // HandleCommand handles commands from the input, selects and does the requested action.
 func (c *Controller) HandleCommand(ctx context.Context) error {
-	c.rw.Write(ctx, "Type the command (or exit): ")
+	c.rw.Write(ctx, "Type the command, or exit: ")
 	act, err := c.rw.Read(ctx)
 	if err != nil && !errors.Is(err, errs.ErrEmptyInput) {
 		return fmt.Errorf("HandleCommand: read command failed %w", err)
 	}
 
-	switch strings.ToLower(act) {
+	act = strings.ToLower(act)
+	switch act {
 	case "register":
 		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.user.Register)
 		if err != nil {
@@ -56,10 +57,20 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("HandleCommand: login user failed %w", err)
 		}
-	case "create":
-		err := c.data.Create(ctx)
+	case "create", "update":
+		err := c.data.CreateOrUpdate(ctx, act)
 		if err != nil {
-			return fmt.Errorf("HandleCommand: create data failed %w", err)
+			return fmt.Errorf("HandleCommand: create or update data failed %w", err)
+		}
+	case "get":
+		err := c.data.GetValue(ctx)
+		if err != nil {
+			return fmt.Errorf("HandleCommand: get data value failed %w", err)
+		}
+	case "delete":
+		err := c.data.Delete(ctx)
+		if err != nil {
+			return fmt.Errorf("HandleCommand: delete data failed %w", err)
 		}
 	case "exit":
 		return fmt.Errorf("HandleCommand: %w", errs.ErrExit)
