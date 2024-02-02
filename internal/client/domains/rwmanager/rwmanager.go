@@ -7,6 +7,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
+
+	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 )
 
 // RWManager contains reader and writer
@@ -20,6 +23,7 @@ type RWManager struct {
 // and writing data to the output.
 type RWService interface {
 	Read(ctx context.Context) (string, error)
+	ReadTwoWords(ctx context.Context) (string, error)
 	Write(ctx context.Context, out string) error
 	WriteString(ctx context.Context, out string) error
 }
@@ -36,10 +40,23 @@ func NewRWManager(ctx context.Context, in *os.File, out *os.File) RWService {
 func (m *RWManager) Read(ctx context.Context) (string, error) {
 	var in string
 	_, err := fmt.Fscanln(m.reader, &in)
-	if err != nil && len(in) != 0 {
+	if len(in) == 0 {
+		return "", fmt.Errorf("Read: %w", errs.ErrEmptyInput)
+	}
+	if err != nil {
 		return "", fmt.Errorf("Read: read string from input failed %w", err)
 	}
 	return in, nil
+}
+
+// ReadTwoWords reads two words from the input string, returns the string value with these words.
+func (m *RWManager) ReadTwoWords(ctx context.Context) (string, error) {
+	in := make([]string, 2)
+	_, err := fmt.Fscanf(m.reader, "%s %s\n", &in[0], &in[1])
+	if err != nil {
+		return "", fmt.Errorf("ReadN: read from input failed %w", err)
+	}
+	return strings.Join(in, " "), nil
 }
 
 // Write writes the requested text into the output.

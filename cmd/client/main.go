@@ -66,6 +66,7 @@ func main() {
 		logger.Log.Error("main: create new client failed", zap.Error(err))
 	}
 
+	// Run client
 	wg.Add(1)
 	go func() {
 		client.Serve(ctx)

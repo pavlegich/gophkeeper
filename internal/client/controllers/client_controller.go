@@ -4,6 +4,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -40,18 +41,18 @@ func NewController(ctx context.Context, rw rwmanager.RWService, cfg *config.Clie
 func (c *Controller) HandleCommand(ctx context.Context) error {
 	c.rw.Write(ctx, "Type the command (or exit): ")
 	act, err := c.rw.Read(ctx)
-	if err != nil {
+	if err != nil && !errors.Is(err, errs.ErrEmptyInput) {
 		return fmt.Errorf("HandleCommand: read command failed %w", err)
 	}
 
 	switch strings.ToLower(act) {
 	case "register":
-		err := utils.DoWithRetryIfEmpty(ctx, c.user.Register)
+		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.user.Register)
 		if err != nil {
 			return fmt.Errorf("HandleCommand: register user failed %w", err)
 		}
 	case "login":
-		err := utils.DoWithRetryIfEmpty(ctx, c.user.Login)
+		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.user.Login)
 		if err != nil {
 			return fmt.Errorf("HandleCommand: login user failed %w", err)
 		}

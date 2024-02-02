@@ -3,7 +3,6 @@ package data
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
-	"github.com/pavlegich/gophkeeper/internal/client/domains/user"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
 	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
@@ -47,7 +45,7 @@ func (s *DataService) Create(ctx context.Context) error {
 		return fmt.Errorf("Create: %w", errs.ErrInvalidDataType)
 	}
 
-	s.rw.Write(ctx, "Name: ")
+	s.rw.Write(ctx, "Data name: ")
 	d.Name, err = s.rw.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("Create: couldn't read password %w", err)
@@ -61,14 +59,20 @@ func (s *DataService) Create(ctx context.Context) error {
 	defer multipartWriter.Close()
 
 	dataPart, _ := multipartWriter.CreateFormField("data")
+	var part []byte
 	switch d.Type {
 	case "credentials":
-		part, err := s.readCredentials(ctx)
+		part, err = ReadCredentials(ctx, s.rw)
 		if err != nil {
 			return fmt.Errorf("Create: couldn't read credentials %w", err)
 		}
-		dataPart.Write(part)
+	case "card":
+		part, err = ReadCardDetails(ctx, s.rw)
+		if err != nil {
+			return fmt.Errorf("Create: couldn't read card details %w", err)
+		}
 	}
+	dataPart.Write(part)
 
 	target := "http://" + s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
 
@@ -107,34 +111,4 @@ func (s *DataService) GetValue(ctx context.Context) error {
 }
 func (s *DataService) Delete(ctx context.Context) error {
 	return nil
-}
-
-func (s *DataService) readCredentials(ctx context.Context) ([]byte, error) {
-	u := &user.User{}
-	var err error
-
-	s.rw.Write(ctx, "Login: ")
-	u.Login, err = s.rw.Read(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("readCredentials: couldn't read login %w", err)
-	}
-	if u.Login == "" {
-		return nil, fmt.Errorf("readCredentials: %w", errs.ErrEmptyInput)
-	}
-
-	s.rw.Write(ctx, "Password: ")
-	u.Password, err = s.rw.Read(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("readCredentials: couldn't read password %w", err)
-	}
-	if u.Password == "" {
-		return nil, fmt.Errorf("readCredentials: %w", errs.ErrEmptyInput)
-	}
-
-	data, err := json.Marshal(u)
-	if err != nil {
-		return nil, fmt.Errorf("readCredentials: marshal credentials failed %w", err)
-	}
-
-	return data, nil
 }

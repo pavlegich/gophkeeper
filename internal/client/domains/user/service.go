@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
-	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
 	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
 )
@@ -38,17 +37,11 @@ func (s *UserService) Register(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("Register: couldn't read login %w", err)
 	}
-	if u.Login == "" {
-		return fmt.Errorf("Register: %w", errs.ErrEmptyInput)
-	}
 
 	s.rw.Write(ctx, "Password: ")
 	u.Password, err = s.rw.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("Register: couldn't read password %w", err)
-	}
-	if u.Password == "" {
-		return fmt.Errorf("Register: %w", errs.ErrEmptyInput)
 	}
 
 	body, err := json.Marshal(u)
@@ -99,17 +92,11 @@ func (s *UserService) Login(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("Login: couldn't read login %w", err)
 	}
-	if u.Login == "" {
-		return fmt.Errorf("Login: %w", errs.ErrEmptyInput)
-	}
 
 	s.rw.Write(ctx, "Password: ")
 	u.Password, err = s.rw.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("Login: couldn't read password %w", err)
-	}
-	if u.Password == "" {
-		return fmt.Errorf("Login: %w", errs.ErrEmptyInput)
 	}
 
 	body, err := json.Marshal(u)

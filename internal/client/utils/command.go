@@ -6,6 +6,7 @@ import (
 	"errors"
 	"syscall"
 
+	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 )
 
@@ -43,6 +44,18 @@ func GetKnownErr(err error) error {
 	if errors.Is(err, syscall.ECONNREFUSED) {
 		return errs.ErrConnectionRefused
 	}
+	if errors.Is(err, errs.ErrInvalidCardNumber) {
+		return errs.ErrInvalidCardNumber
+	}
+	if errors.Is(err, errs.ErrInvalidDataType) {
+		return errs.ErrInvalidDataType
+	}
+	if errors.Is(err, errs.ErrInvalidCardDate) {
+		return errs.ErrInvalidCardDate
+	}
+	if errors.Is(err, errs.ErrInvalidCardCV) {
+		return errs.ErrInvalidCardCV
+	}
 	return nil
 }
 
@@ -54,6 +67,19 @@ func DoWithRetryIfUnknown(ctx context.Context, f func(ctx context.Context) error
 		if !errors.Is(err, errs.ErrUnknownCommand) {
 			return err
 		}
+	}
+	return err
+}
+
+// DoWithRetryIfEmpty tries to implement function three times, if the input is empty.
+func DoWithRetryIfEmpty(ctx context.Context, rw rwmanager.RWService, f func(ctx context.Context) error) error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = f(ctx)
+		if !errors.Is(err, errs.ErrEmptyInput) {
+			return err
+		}
+		rw.WriteString(ctx, errs.ErrEmptyInput.Error())
 	}
 	return err
 }
