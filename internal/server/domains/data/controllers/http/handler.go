@@ -4,10 +4,12 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
 	"mime"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 
@@ -119,6 +121,22 @@ func (h *DataHandler) HandleDataValue(w http.ResponseWriter, r *http.Request) {
 		}
 		logger.Log.With(zap.String("user_id", idString)).Error("HandleDataValue: unload requested data failed",
 			zap.Error(err))
+		return
+	}
+
+	if dType == "binary" {
+		var buf bytes.Buffer
+		multipartWriter := multipart.NewWriter(&buf)
+		defer multipartWriter.Close()
+		dataPart, err := multipartWriter.CreateFormField("file")
+		if err != nil {
+			logger.Log.With(zap.String("user_id", idString)).Error("HandleDataValue: create form field failed",
+				zap.Error(err))
+		}
+		dataPart.Write(storedData.Data)
+		w.Header().Set("Content-Type", multipartWriter.FormDataContentType())
+		w.WriteHeader(http.StatusOK)
+		w.Write(buf.Bytes())
 		return
 	}
 

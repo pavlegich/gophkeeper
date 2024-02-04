@@ -38,7 +38,7 @@ func GetMultipartDataFromRequest(ctx context.Context, r *http.Request, d *data.D
 			defer field.Close()
 
 			switch field.FormName() {
-			case "data":
+			case "data", "file":
 				multiparted.Data, err = io.ReadAll(field)
 				if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
 					return nil, fmt.Errorf("GetMultipartDataFromRequest: couldn't read data from the field data %w", err)

@@ -57,6 +57,9 @@ func GetKnownErr(err error) error {
 	if errors.Is(err, errs.ErrInvalidMetadata) {
 		return errs.ErrInvalidMetadata
 	}
+	if errors.Is(err, errs.ErrInvalidFilePath) {
+		return errs.ErrInvalidFilePath
+	}
 	return nil
 }
 

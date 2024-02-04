@@ -14,6 +14,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
 )
 
+// CardDetails contains client card details.
 type CardDetails struct {
 	Number  int       `json:"number"`
 	Owner   string    `json:"owner"`
@@ -21,6 +22,7 @@ type CardDetails struct {
 	CV      int       `json:"cv"`
 }
 
+// ReadCardDetails reads card details from the input, returns them in byte format.
 func ReadCardDetails(ctx context.Context, rw rwmanager.RWService) ([]byte, error) {
 	c := &CardDetails{}
 	var err error

@@ -38,7 +38,7 @@ func NewRWManager(ctx context.Context, in *os.File, out *os.File) RWService {
 // Read reads data from the input and returns it.
 func (m *RWManager) Read(ctx context.Context) (string, error) {
 	in, err := m.reader.ReadString('\n')
-	in = strings.TrimRight(in, "\n")
+	in = strings.TrimSpace(strings.TrimRight(in, "\n"))
 	if len(in) == 0 {
 		return "", fmt.Errorf("Read: %w", errs.ErrEmptyInput)
 	}

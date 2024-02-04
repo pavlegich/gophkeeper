@@ -9,4 +9,5 @@ var (
 	ErrInvalidCardDate   = errors.New("invalid card expiration date")
 	ErrInvalidCardCV     = errors.New("invalid card cv")
 	ErrInvalidMetadata   = errors.New("invalid metadata")
+	ErrInvalidFilePath   = errors.New("invalid file path")
 )

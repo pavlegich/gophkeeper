@@ -1,12 +1,17 @@
-create
-text
-new
-safhasjkfhefjklehfjkhefwejfhwefjknwkwcwencwec
-cewkcbwekcwelcjilewcklwnekcjhqljcklqnckl le l eqc qeoc q oic
-ejeqfjdqdjq qjiqjropqwjrqkd3r139ier-dp013d3393d-1ac
-close
+login
+user
+user
+get
+binary
+docx
+/Users/Pavel/Desktop/from_server.docx
 
 exit
+
+-- login
+login
+user
+user
 
 -- card
 card
@@ -15,6 +20,11 @@ new
 08/12
 Card Holder
 123
+
+-- file
+binary
+new
+/Users/Pavel/Desktop/Go.Edu/gophkeeper/test/file.txt
 
 -- text
 text

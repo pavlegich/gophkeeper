@@ -10,6 +10,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
 )
 
+// ReadText reads text from the input, returns it in byte format.
 func ReadText(ctx context.Context, rw rwmanager.RWService) ([]byte, error) {
 	res := ""
 	var in string

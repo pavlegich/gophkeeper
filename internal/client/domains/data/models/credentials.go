@@ -9,6 +9,7 @@ import (
 	"github.com/pavlegich/gophkeeper/internal/client/domains/user"
 )
 
+// ReadCredentials reads credentials from the input, returns them in byte format.
 func ReadCredentials(ctx context.Context, rw rwmanager.RWService) ([]byte, error) {
 	u := &user.User{}
 	var err error

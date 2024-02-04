@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -42,42 +44,10 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 	var buf bytes.Buffer
 	multipartWriter := multipart.NewWriter(&buf)
 	defer multipartWriter.Close()
-
-	// Data
-	dataPart, err := multipartWriter.CreateFormField("data")
+	err = createMultipartData(ctx, s.rw, multipartWriter, d)
 	if err != nil {
-		fmt.Errorf("CreateOrUpdate: create multipart data form failed %w", err)
+		return fmt.Errorf("CreateOrUpdate: create multipart data failed %w", err)
 	}
-	var part []byte
-	switch d.Type {
-	case "credentials":
-		part, err = models.ReadCredentials(ctx, s.rw)
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate: couldn't read credentials %w", err)
-		}
-	case "card":
-		part, err = models.ReadCardDetails(ctx, s.rw)
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate: couldn't read card details %w", err)
-		}
-	case "text":
-		part, err = models.ReadText(ctx, s.rw)
-		if err != nil {
-			return fmt.Errorf("CreateOrUpdate: couldn't read text %w", err)
-		}
-	}
-	dataPart.Write(part)
-
-	// Metadata
-	metaPart, err := multipartWriter.CreateFormField("metadata")
-	if err != nil {
-		return fmt.Errorf("CreateOrUpdate: create multipart metadata form failed %w", err)
-	}
-	meta, err := models.ReadMetadata(ctx, s.rw)
-	if err != nil {
-		return fmt.Errorf("CreateOrUpdate: read metadata failed %w", err)
-	}
-	metaPart.Write(meta)
 
 	// Prepare request
 	target := "http://" + s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
@@ -98,6 +68,7 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 		return fmt.Errorf("CreateOrUpdate: new request failed %w", err)
 	}
 
+	// Add values into the header
 	if s.cfg.Cookie != nil {
 		req.AddCookie(s.cfg.Cookie)
 	}
@@ -121,6 +92,7 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 	return nil
 }
 
+// GetValue sends request to the server to get value that was requested by the client.
 func (s *DataService) GetValue(ctx context.Context) error {
 	d, err := readDataTypeAndName(ctx, s.rw)
 	if err != nil {
@@ -153,6 +125,22 @@ func (s *DataService) GetValue(ctx context.Context) error {
 	err = utils.CheckStatusCode(resp.StatusCode)
 	if err != nil {
 		return fmt.Errorf("GetValue: create data failed %w", err)
+	}
+
+	if d.Type == "binary" {
+		s.rw.Write(ctx, "Type path for save file: ")
+		path, err := s.rw.Read(ctx)
+		if err != nil {
+			return fmt.Errorf("GetValue: read file path failed %w", err)
+		}
+		err = utils.SaveFromMultipartToFile(ctx, resp, path)
+		if err != nil {
+			return fmt.Errorf("GetValue: save file failed %w", err)
+		}
+
+		s.rw.WriteString(ctx, utils.Success)
+
+		return nil
 	}
 
 	var buf bytes.Buffer
@@ -231,4 +219,69 @@ func readDataTypeAndName(ctx context.Context, rw rwmanager.RWService) (*Data, er
 	}
 
 	return d, nil
+}
+
+func createMultipartData(ctx context.Context, rw rwmanager.RWService, mpwriter *multipart.Writer, d *Data) error {
+	// Data
+	var part []byte
+	var err error
+	switch d.Type {
+	case "credentials":
+		part, err = models.ReadCredentials(ctx, rw)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't read credentials %w", err)
+		}
+	case "card":
+		part, err = models.ReadCardDetails(ctx, rw)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't read card details %w", err)
+		}
+	case "text":
+		part, err = models.ReadText(ctx, rw)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't read text %w", err)
+		}
+	}
+
+	// Put data into the dataPart
+	var dataPart io.Writer
+	if d.Type == "binary" {
+		rw.Write(ctx, "Type absolute path to file: ")
+		path, err := rw.Read(ctx)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't read file path %w", err)
+		}
+		dataPart, err = mpwriter.CreateFormFile("file", path)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't create form file %w", err)
+		}
+		file, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: %w", errs.ErrInvalidFilePath)
+		}
+		defer file.Close()
+		_, err = io.Copy(dataPart, file)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: copy file failed %w", err)
+		}
+	} else {
+		dataPart, err = mpwriter.CreateFormField("data")
+		if err != nil {
+			return fmt.Errorf("createMultipartData: create multipart data form failed %w", err)
+		}
+		dataPart.Write(part)
+	}
+
+	// Metadata
+	metaPart, err := mpwriter.CreateFormField("metadata")
+	if err != nil {
+		return fmt.Errorf("createMultipartData: create multipart metadata form failed %w", err)
+	}
+	meta, err := models.ReadMetadata(ctx, rw)
+	if err != nil {
+		return fmt.Errorf("createMultipartData: read metadata failed %w", err)
+	}
+	metaPart.Write(meta)
+
+	return nil
 }
