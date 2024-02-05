@@ -1,10 +1,13 @@
 login
 user
 user
-get
-binary
-docx
-/Users/Pavel/Desktop/from_server.docx
+create
+card
+new
+5536913798031973
+08/12
+Card Holder
+123
 
 exit
 
@@ -23,8 +26,8 @@ Card Holder
 
 -- file
 binary
-new
-/Users/Pavel/Desktop/Go.Edu/gophkeeper/test/file.txt
+docx
+/Users/Pavel/Desktop/from_server.docx
 
 -- text
 text

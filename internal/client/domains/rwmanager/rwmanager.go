@@ -6,7 +6,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"os"
+	"io"
 	"strings"
 
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
@@ -28,7 +28,7 @@ type RWService interface {
 }
 
 // NewRWManager creates and returns new RWManager object.
-func NewRWManager(ctx context.Context, in *os.File, out *os.File) RWService {
+func NewRWManager(ctx context.Context, in io.Reader, out io.Writer) RWService {
 	return &RWManager{
 		reader: bufio.NewReader(in),
 		writer: bufio.NewWriter(out),

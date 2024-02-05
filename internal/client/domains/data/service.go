@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pavlegich/gophkeeper/internal/client/domains/data/models"
+	"github.com/pavlegich/gophkeeper/internal/client/domains/data/readers"
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 	"github.com/pavlegich/gophkeeper/internal/client/utils"
@@ -221,26 +221,24 @@ func readDataTypeAndName(ctx context.Context, rw rwmanager.RWService) (*Data, er
 	return d, nil
 }
 
+// createMultipartData put data parts into multipart fields.
 func createMultipartData(ctx context.Context, rw rwmanager.RWService, mpwriter *multipart.Writer, d *Data) error {
 	// Data
 	var part []byte
 	var err error
+	var dataReader DataReader
 	switch d.Type {
 	case "credentials":
-		part, err = models.ReadCredentials(ctx, rw)
-		if err != nil {
-			return fmt.Errorf("createMultipartData: couldn't read credentials %w", err)
-		}
+		dataReader = readers.NewCredentialsReader(ctx, rw)
 	case "card":
-		part, err = models.ReadCardDetails(ctx, rw)
-		if err != nil {
-			return fmt.Errorf("createMultipartData: couldn't read card details %w", err)
-		}
+		dataReader = readers.NewCardReader(ctx, rw)
 	case "text":
-		part, err = models.ReadText(ctx, rw)
-		if err != nil {
-			return fmt.Errorf("createMultipartData: couldn't read text %w", err)
-		}
+		dataReader = readers.NewTextReader(ctx, rw)
+	}
+
+	part, err = dataReader.Read(ctx)
+	if err != nil {
+		return fmt.Errorf("createMultipartData: couldn't read %s %w", d.Type, err)
 	}
 
 	// Put data into the dataPart
@@ -277,11 +275,12 @@ func createMultipartData(ctx context.Context, rw rwmanager.RWService, mpwriter *
 	if err != nil {
 		return fmt.Errorf("createMultipartData: create multipart metadata form failed %w", err)
 	}
-	meta, err := models.ReadMetadata(ctx, rw)
+	metaReader := readers.NewMetadataReader(ctx, rw)
+	metaBytes, err := metaReader.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("createMultipartData: read metadata failed %w", err)
 	}
-	metaPart.Write(meta)
+	metaPart.Write(metaBytes)
 
 	return nil
 }

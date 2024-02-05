@@ -30,9 +30,9 @@ func main() {
 	defer stop()
 
 	// Manager for read and write
-	// f, _ := os.Open("commands")
-	// rw := rwmanager.NewRWManager(ctx, f, os.Stdout)
-	rw := rwmanager.NewRWManager(ctx, os.Stdin, os.Stdout)
+	f, _ := os.Open("commands")
+	rw := rwmanager.NewRWManager(ctx, f, os.Stdout)
+	// rw := rwmanager.NewRWManager(ctx, os.Stdin, os.Stdout)
 
 	// Versions
 	rw.WriteString(ctx, "Build version: "+buildVersion)

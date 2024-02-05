@@ -9,6 +9,8 @@ import (
 type contextKey int
 
 const (
+	// List of const variables contains variables for
+	// put values into and get values from the context.
 	ContextIDKey contextKey = iota
 )
 

@@ -1,28 +1,21 @@
-// Пакет staticlint содержит набор статических анализаторов исходного кода,
-// объединённых в multichecker.
+// The staticlint package contains a set of static source code analyzers,
+// combined into a multichecker.
 //
-// multichecker включает в себя:
+// multichecker contains:
 //
-// - все анализаторы пакета golang.org/x/tools/go/analysis/passes;
+// - all analyzers from golang.org/x/tools/go/analysis/passes;
 //
-// - все анализаторы класса SA пакета staticcheck.io;
+// - all SA analyzers of staticcheck.io package;
 //
-// - анализаторы S1020, ST1003, QF1003 пакета staticcheck.io;
+// - analyzers S1020, ST1003, QF1003 of staticcheck.io package;
 //
-// - анализатор корректного закрытия тела запроса request.Body (github.com/timakin/bodyclose/passes/bodyclose);
+// - analyzer of correct request body closing request.Body (github.com/timakin/bodyclose/passes/bodyclose);
 //
-// - анализатор корректного обёртывания ошибок (github.com/fatih/errwrap);
+// - analyzer of correct error wrap (github.com/fatih/errwrap);
 //
-// - собственный анализатор предотвращения использования вызова os.Exit в main() пакета main.
+// Running examples:
 //
-// Примеры запуска бинарного файла:
-//
-//	./staticlint -S1020 <путь>
-//	./staticlint -fieldalignment <путь>
-//	./staticlint -errwrap <путь>
-//
-// Анализатор предотвращения использования вызова os.Exit в функции main пакета main
-// запускается следующей командой:
-//
-//	./staticlint -exitcheck <путь>
+//	./staticlint -S1020 <path>
+//	./staticlint -fieldalignment <path>
+//	./staticlint -errwrap <path>
 package main

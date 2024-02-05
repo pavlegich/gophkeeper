@@ -18,3 +18,10 @@ type Service interface {
 	GetValue(ctx context.Context) error
 	Delete(ctx context.Context) error
 }
+
+// DataReader describes methods related with object,
+// that is able to read data from the input, store it
+// and return in byte format.
+type DataReader interface {
+	Read(ctx context.Context) ([]byte, error)
+}
