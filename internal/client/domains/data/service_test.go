@@ -97,7 +97,7 @@ func Test_readDataTypeAndName(t *testing.T) {
 			args: args{
 				in: &Data{
 					Type: "",
-					Name: "",
+					Name: "anyName",
 				},
 			},
 			want:    nil,

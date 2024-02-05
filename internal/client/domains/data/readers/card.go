@@ -28,6 +28,7 @@ type CardReader struct {
 	rw      rwmanager.RWService
 }
 
+// NewCardReader creates and returns new card reader object.
 func NewCardReader(ctx context.Context, rw rwmanager.RWService) *CardReader {
 	return &CardReader{
 		details: &CardDetails{},
@@ -43,49 +44,49 @@ func (r *CardReader) Read(ctx context.Context) ([]byte, error) {
 	r.rw.Write(ctx, "Card number: ")
 	numberString, err := r.rw.Read(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: couldn't read card number %w", err)
+		return nil, fmt.Errorf("Read: couldn't read card number %w", err)
 	}
 
 	r.details.Number, err = strconv.Atoi(numberString)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrInvalidCardNumber)
+		return nil, fmt.Errorf("Read: %w", errs.ErrInvalidCardNumber)
 	}
 	if !utils.IsValidCardNumber(r.details.Number) {
-		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrInvalidCardNumber)
+		return nil, fmt.Errorf("Read: %w", errs.ErrInvalidCardNumber)
 	}
 
 	// Read card expiration date
 	r.rw.Write(ctx, "Card expiration date (MM/YY): ")
 	dateString, err := r.rw.Read(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: couldn't read card expiration date %w", err)
+		return nil, fmt.Errorf("Read: couldn't read card expiration date %w", err)
 	}
 	r.details.Expires, err = time.Parse("01/06", dateString)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrInvalidCardDate)
+		return nil, fmt.Errorf("Read: %w", errs.ErrInvalidCardDate)
 	}
 
 	// Read card owner
 	r.rw.Write(ctx, "Card owner: ")
 	r.details.Owner, err = r.rw.Read(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: couldn't read card owner %w", err)
+		return nil, fmt.Errorf("Read: couldn't read card owner %w", err)
 	}
 
-	// Read cv
-	r.rw.Write(ctx, "Card cv: ")
+	// Read CV
+	r.rw.Write(ctx, "Card CV: ")
 	cvString, err := r.rw.Read(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: couldn't read card owner %w", err)
+		return nil, fmt.Errorf("Read: couldn't read card CV %w", err)
 	}
 	r.details.CV, err = strconv.Atoi(cvString)
 	if err != nil || r.details.CV > 999 || r.details.CV < 100 {
-		return nil, fmt.Errorf("ReadCardDetails: %w", errs.ErrInvalidCardCV)
+		return nil, fmt.Errorf("Read: %w", errs.ErrInvalidCardCV)
 	}
 
 	data, err := json.MarshalIndent(r.details, "", "   ")
 	if err != nil {
-		return nil, fmt.Errorf("ReadCardDetails: marshal card details failed %w", err)
+		return nil, fmt.Errorf("Read: marshal card details failed %w", err)
 	}
 
 	return data, nil
