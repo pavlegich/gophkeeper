@@ -18,8 +18,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// go run -ldflags "-X main.buildVersion=v1.0.1 -X main.buildDate=$(date +'%Y/%m/%d') -X main.buildCommit=1d1wdd1f" main.go
-var buildVersion string = "v1.0.0"
+// go run -ldflags "-X 'main.buildVersion=v1.0.0' -X 'main.buildDate=$(date +'%d/%m/%Y')' -X 'main.buildCommit=1d1wdd1f'" main.go
+var buildVersion string = "N/A"
 var buildDate string = "N/A"
 var buildCommit string = "N/A"
 
