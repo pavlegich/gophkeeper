@@ -4,6 +4,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 	"syscall"
 
 	"github.com/pavlegich/gophkeeper/internal/client/domains/rwmanager"
@@ -11,6 +12,7 @@ import (
 )
 
 const (
+	// Constants contain phrases for client output.
 	Greet          = "Welcome to GophKeeper!"
 	Quit           = "quit"
 	Success        = "success"
@@ -68,6 +70,9 @@ func DoWithRetryIfUnknown(ctx context.Context, f func(ctx context.Context) error
 	var err error
 	for i := 0; i < 3; i++ {
 		err = f(ctx)
+		if ctx.Err() != nil {
+			return fmt.Errorf("DoWithRetryIfUnknown: context error %w", ctx.Err())
+		}
 		if !errors.Is(err, errs.ErrUnknownCommand) {
 			return err
 		}
@@ -80,10 +85,13 @@ func DoWithRetryIfEmpty(ctx context.Context, rw rwmanager.RWService, f func(ctx 
 	var err error
 	for i := 0; i < 3; i++ {
 		err = f(ctx)
+		if ctx.Err() != nil {
+			return fmt.Errorf("DoWithRetryIfEmpty: context error %w", ctx.Err())
+		}
 		if !errors.Is(err, errs.ErrEmptyInput) {
 			return err
 		}
-		rw.WriteString(ctx, errs.ErrEmptyInput.Error())
+		rw.Writeln(ctx, errs.ErrEmptyInput.Error())
 	}
 	return err
 }

@@ -28,15 +28,10 @@ func NewUserRepository(ctx context.Context, db *sql.DB) *Repository {
 
 // GetUserByLogin gets by login from the storage and returns user object.
 func (r *Repository) GetUserByLogin(ctx context.Context, login string) (*user.User, error) {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("GetUserByLogin: connection to database is died %w", err)
-	}
-
 	row := r.db.QueryRowContext(ctx, `SELECT id, login, password FROM users WHERE login = $1`, login)
 
 	var storedUser user.User
-	err = row.Scan(&storedUser.ID, &storedUser.Login, &storedUser.Password)
+	err := row.Scan(&storedUser.ID, &storedUser.Login, &storedUser.Password)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("GetUserByLogin: scan row failed %w", errs.ErrUserNotFound)
 	}
@@ -54,16 +49,11 @@ func (r *Repository) GetUserByLogin(ctx context.Context, login string) (*user.Us
 
 // CreateUser saves new user data into the storage and returns user object.
 func (r *Repository) CreateUser(ctx context.Context, u *user.User) (*user.User, error) {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("CreateUser: connection to database in died %w", err)
-	}
-
 	row := r.db.QueryRowContext(ctx, `INSERT INTO users (login, password) VALUES ($1, $2) 
 	RETURNING id, login, password`, u.Login, u.Password)
 
 	var storedUser user.User
-	err = row.Scan(&storedUser.ID, &storedUser.Login, &storedUser.Password)
+	err := row.Scan(&storedUser.ID, &storedUser.Login, &storedUser.Password)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {

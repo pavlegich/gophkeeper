@@ -29,11 +29,6 @@ func NewDataRepository(ctx context.Context, db *sql.DB) *Repository {
 
 // GetDataByName gets data by name from the storage and returns data object.
 func (r *Repository) GetDataByName(ctx context.Context, dType string, name string) (*data.Data, error) {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("GetDataByName: connection to database is died %w", err)
-	}
-
 	userID, err := utils.GetUserIDFromContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("GetDataByName: couldn't read user id from the context %w", err)
@@ -54,7 +49,7 @@ func (r *Repository) GetDataByName(ctx context.Context, dType string, name strin
 
 	err = row.Err()
 	if err != nil {
-		return nil, fmt.Errorf("GetUserByLogin: row.Err %w", err)
+		return nil, fmt.Errorf("GetDataByName: row.Err %w", err)
 	}
 
 	return &storedData, nil
@@ -62,11 +57,6 @@ func (r *Repository) GetDataByName(ctx context.Context, dType string, name strin
 
 // CreateData saves new data object into the storage.
 func (r *Repository) CreateData(ctx context.Context, d *data.Data) error {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return fmt.Errorf("CreateData: connection to database in died %w", err)
-	}
-
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("CreateData: begin transaction failed %w", err)
@@ -89,7 +79,7 @@ func (r *Repository) CreateData(ctx context.Context, d *data.Data) error {
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-			return fmt.Errorf("CreateUser: %w", errs.ErrDataAlreadyUpload)
+			return fmt.Errorf("CreateData: %w", errs.ErrDataAlreadyUpload)
 		}
 		return fmt.Errorf("CreateData: insert data failed %w", err)
 	}
@@ -103,11 +93,6 @@ func (r *Repository) CreateData(ctx context.Context, d *data.Data) error {
 
 // UpdateData updates user data in storage.
 func (r *Repository) UpdateData(ctx context.Context, d *data.Data) error {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return fmt.Errorf("UpdateData: connection to database in died %w", err)
-	}
-
 	res, err := r.db.ExecContext(ctx, `UPDATE data SET data = $1, metadata = $2 
 	WHERE user_id = $3 AND name = $4 AND data_type = $5`,
 		d.Data, d.Metadata, d.UserID, d.Name, d.Type)
@@ -128,11 +113,6 @@ func (r *Repository) UpdateData(ctx context.Context, d *data.Data) error {
 
 // DeleteDataByName deletes requested data by it's name.
 func (r *Repository) DeleteDataByName(ctx context.Context, dType string, name string) error {
-	err := r.db.PingContext(ctx)
-	if err != nil {
-		return fmt.Errorf("DeleteData: connection to database in died %w", err)
-	}
-
 	userID, err := utils.GetUserIDFromContext(ctx)
 	if err != nil {
 		return fmt.Errorf("DeleteDataByName: couldn't read user id from the context %w", err)

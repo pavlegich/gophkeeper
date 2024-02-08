@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/pavlegich/gophkeeper/internal/common/infra/config"
-	"github.com/pavlegich/gophkeeper/internal/server/controllers/middlewares"
 )
 
 // Server contains server attributes.
@@ -19,7 +18,6 @@ type Server struct {
 // NewServer initializes controller and router, returns new server object.
 func NewServer(ctx context.Context, mh *chi.Mux, cfg *config.ServerConfig) (*Server, error) {
 	r := chi.NewRouter()
-	r.Use(middlewares.Recovery)
 	r.Mount("/", mh)
 
 	srv := &http.Server{

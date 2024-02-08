@@ -49,7 +49,7 @@ func (s *UserService) Register(ctx context.Context) error {
 		return fmt.Errorf("Register: marshal user failed %w", err)
 	}
 
-	target := "http://" + s.cfg.Address + "/api/user/register"
+	target := s.cfg.Address + "/api/user/register"
 	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctxReq, http.MethodPost, target, bytes.NewBuffer(body))
@@ -69,7 +69,7 @@ func (s *UserService) Register(ctx context.Context) error {
 	}
 
 	for _, c := range resp.Cookies() {
-		if c.Name == "auth" {
+		if c.Name == "auth" && c != nil {
 			s.cfg.Cookie = c
 		}
 	}
@@ -77,7 +77,7 @@ func (s *UserService) Register(ctx context.Context) error {
 		return fmt.Errorf("Register: cookie not found")
 	}
 
-	s.rw.WriteString(ctx, utils.Success)
+	s.rw.Writeln(ctx, utils.Success)
 
 	return nil
 }
@@ -104,7 +104,7 @@ func (s *UserService) Login(ctx context.Context) error {
 		return fmt.Errorf("Login: marshal user failed %w", err)
 	}
 
-	target := "http://" + s.cfg.Address + "/api/user/login"
+	target := s.cfg.Address + "/api/user/login"
 	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctxReq, http.MethodPost, target, bytes.NewBuffer(body))
@@ -124,7 +124,7 @@ func (s *UserService) Login(ctx context.Context) error {
 	}
 
 	for _, c := range resp.Cookies() {
-		if c.Name == "auth" {
+		if c.Name == "auth" && c != nil {
 			s.cfg.Cookie = c
 		}
 	}
@@ -132,7 +132,7 @@ func (s *UserService) Login(ctx context.Context) error {
 		return fmt.Errorf("Login: cookie not found")
 	}
 
-	s.rw.WriteString(ctx, utils.Success)
+	s.rw.Writeln(ctx, utils.Success)
 
 	return nil
 }

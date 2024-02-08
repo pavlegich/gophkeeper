@@ -35,12 +35,12 @@ func main() {
 	rw := rwmanager.NewRWManager(ctx, os.Stdin, os.Stdout)
 
 	// Versions
-	rw.WriteString(ctx, "Build version: "+buildVersion)
-	rw.WriteString(ctx, "Build date: "+buildDate)
-	rw.WriteString(ctx, "Build commit: "+buildCommit)
+	rw.Writeln(ctx, "Build version: "+buildVersion)
+	rw.Writeln(ctx, "Build date: "+buildDate)
+	rw.Writeln(ctx, "Build commit: "+buildCommit)
 
 	// Greeting
-	rw.WriteString(ctx, utils.Greet)
+	rw.Writeln(ctx, utils.Greet)
 
 	// WaitGroup
 	wg := &sync.WaitGroup{}
@@ -92,11 +92,11 @@ func main() {
 		select {
 		case <-connsClosed:
 		case <-time.After(5 * time.Second):
-			rw.WriteString(ctx, "\n"+utils.UnexpectedQuit)
+			rw.Writeln(ctx, "\n"+utils.UnexpectedQuit)
 			return
 			// panic("shutdown timeout")
 		}
 	}
 
-	rw.WriteString(ctx, utils.Quit)
+	rw.Writeln(ctx, utils.Quit)
 }

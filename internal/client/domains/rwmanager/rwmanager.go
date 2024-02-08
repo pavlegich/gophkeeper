@@ -24,7 +24,8 @@ type RWManager struct {
 type RWService interface {
 	Read(ctx context.Context) (string, error)
 	Write(ctx context.Context, out string) error
-	WriteString(ctx context.Context, out string) error
+	Writeln(ctx context.Context, out string) error
+	Error(ctx context.Context, e error) error
 }
 
 // NewRWManager creates and returns new RWManager object.
@@ -58,11 +59,21 @@ func (m *RWManager) Write(ctx context.Context, out string) error {
 	return nil
 }
 
-// WriteString writes the requested text into the output from the new line.
-func (m *RWManager) WriteString(ctx context.Context, out string) error {
+// Writeln writes the requested text into the output from the new line.
+func (m *RWManager) Writeln(ctx context.Context, out string) error {
 	_, err := fmt.Fprintf(m.writer, "%s\n", out)
 	if err != nil {
 		return fmt.Errorf("WriteString: print into the output failed %w", err)
+	}
+	m.writer.Flush()
+	return nil
+}
+
+// Error writes error into the output.
+func (m *RWManager) Error(ctx context.Context, e error) error {
+	_, err := fmt.Fprintf(m.writer, "%s\n", e.Error())
+	if err != nil {
+		return fmt.Errorf("Error: print into the output failed %w", err)
 	}
 	m.writer.Flush()
 	return nil

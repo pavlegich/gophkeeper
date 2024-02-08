@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Restore recovers server operation when a server running panic occurs.
+// Recovery recovers server operation when a server running panic occurs.
 func Recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -17,7 +17,6 @@ func Recovery(next http.Handler) http.Handler {
 					zap.Any("error", err),
 				)
 
-				w.Header().Set("Content-Type", "text/plain")
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 		}()

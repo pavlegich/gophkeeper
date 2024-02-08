@@ -36,6 +36,7 @@ func CheckStatusCode(code int) error {
 func DoRequestWithRetry(ctx context.Context, r *http.Request) (*http.Response, error) {
 	var err error = nil
 	var resp *http.Response
+
 	intervals := []time.Duration{0, time.Second, 3 * time.Second, 5 * time.Second}
 	for _, interval := range intervals {
 		time.Sleep(interval)

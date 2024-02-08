@@ -33,6 +33,7 @@ func (c *Controller) BuildRoute(ctx context.Context) (*chi.Mux, error) {
 	r := chi.NewRouter()
 
 	r.Use(middlewares.WithLogging)
+	r.Use(middlewares.Recovery)
 	r.Use(middlewares.WithAuth(c.cfg.Token))
 	r.Use(middlewares.WithCompress)
 

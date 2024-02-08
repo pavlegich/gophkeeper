@@ -34,7 +34,7 @@ func NewDataService(ctx context.Context, rw rwmanager.RWService, cfg *config.Cli
 
 // CreateOrUpdate reads information about data from the input,
 // sends request to the server with requested action.
-func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
+func (s *DataService) CreateOrUpdate(ctx context.Context) error {
 	d, err := readDataTypeAndName(ctx, s.rw)
 	if err != nil {
 		return fmt.Errorf("CreateOrUpdate: couldn't read data type and name %w", err)
@@ -50,10 +50,12 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 	}
 
 	// Prepare request
-	target := "http://" + s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
+	target := s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
 
-	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
+	act, err := utils.GetActionFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("CreateOrUpdate: get action from context failed %w", err)
+	}
 
 	var method string
 	switch act {
@@ -63,7 +65,10 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 		method = http.MethodPut
 	}
 
-	req, err := http.NewRequestWithContext(ctxReq, method, target, &buf)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, method, target, &buf)
 	if err != nil {
 		return fmt.Errorf("CreateOrUpdate: new request failed %w", err)
 	}
@@ -87,7 +92,7 @@ func (s *DataService) CreateOrUpdate(ctx context.Context, act string) error {
 		return fmt.Errorf("CreateOrUpdate: create data failed %w", err)
 	}
 
-	s.rw.WriteString(ctx, utils.Success)
+	s.rw.Writeln(ctx, utils.Success)
 
 	return nil
 }
@@ -100,12 +105,12 @@ func (s *DataService) GetValue(ctx context.Context) error {
 	}
 
 	// Prepare request
-	target := "http://" + s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
+	target := s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
 
-	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctxReq, http.MethodGet, target, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
 	if err != nil {
 		return fmt.Errorf("GetValue: new request failed %w", err)
 	}
@@ -138,7 +143,7 @@ func (s *DataService) GetValue(ctx context.Context) error {
 			return fmt.Errorf("GetValue: save file failed %w", err)
 		}
 
-		s.rw.WriteString(ctx, utils.Success)
+		s.rw.Writeln(ctx, utils.Success)
 
 		return nil
 	}
@@ -149,7 +154,7 @@ func (s *DataService) GetValue(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("GetValue: read data from body failed %w", err)
 	}
-	s.rw.WriteString(ctx, buf.String())
+	s.rw.Writeln(ctx, buf.String())
 
 	return nil
 }
@@ -163,12 +168,12 @@ func (s *DataService) Delete(ctx context.Context) error {
 	}
 
 	// Prepare request
-	target := "http://" + s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
+	target := s.cfg.Address + "/api/user/data/" + d.Type + "/" + d.Name
 
-	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	req, err := http.NewRequestWithContext(ctxReq, http.MethodDelete, target, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, target, nil)
 	if err != nil {
 		return fmt.Errorf("Delete: new request failed %w", err)
 	}
@@ -190,7 +195,7 @@ func (s *DataService) Delete(ctx context.Context) error {
 		return fmt.Errorf("CreateOrUpdate: create data failed %w", err)
 	}
 
-	s.rw.WriteString(ctx, utils.Success)
+	s.rw.Writeln(ctx, utils.Success)
 
 	return nil
 }

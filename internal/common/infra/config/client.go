@@ -25,7 +25,7 @@ func NewClientConfig(ctx context.Context) *ClientConfig {
 // ParseFlags handles and processes flags and environments values
 // when launching the client.
 func (cfg *ClientConfig) ParseFlags(ctx context.Context) error {
-	flag.StringVar(&cfg.Address, "a", "localhost:8080", "HTTP-server endpoint address host:port")
+	flag.StringVar(&cfg.Address, "a", "http://localhost:8080", "HTTP-server endpoint address 'protocol://host:port'")
 
 	flag.Parse()
 
