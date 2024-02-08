@@ -11,62 +11,6 @@ import (
 	errs "github.com/pavlegich/gophkeeper/internal/client/errors"
 )
 
-func TestDoWithRetryIfUnknown(t *testing.T) {
-	ctx := context.Background()
-	type args struct {
-		f func(ctx context.Context) error
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    error
-		wantErr bool
-	}{
-		{
-			name: "ok",
-			args: args{
-				f: func(ctx context.Context) error {
-					return nil
-				},
-			},
-			want:    nil,
-			wantErr: false,
-		},
-		{
-			name: "unknown_command_error",
-			args: args{
-				f: func(ctx context.Context) error {
-					return errs.ErrUnknownCommand
-				},
-			},
-			want:    errs.ErrUnknownCommand,
-			wantErr: true,
-		},
-		{
-			name: "not_unknown_and_nil_error",
-			args: args{
-				f: func(ctx context.Context) error {
-					return errs.ErrBadRequest
-				},
-			},
-			want:    errs.ErrBadRequest,
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := DoWithRetryIfUnknown(ctx, tt.args.f)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("DoWithRetryIfUnknown() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			if !errors.Is(err, tt.want) {
-				t.Errorf("DoWithRetryIfUnknown() = %v, want %v", err, tt.want)
-			}
-		})
-	}
-}
-
 func TestDoWithRetryIfEmpty(t *testing.T) {
 	var in bytes.Buffer
 	var out bytes.Buffer

@@ -68,21 +68,6 @@ func GetKnownErr(err error) error {
 	return nil
 }
 
-// DoWithRetryIfUnknown tries to implement function three times, if the input is empty.
-func DoWithRetryIfUnknown(ctx context.Context, f func(ctx context.Context) error) error {
-	var err error
-	for i := 0; i < 3; i++ {
-		err = f(ctx)
-		if ctx.Err() != nil {
-			return fmt.Errorf("DoWithRetryIfUnknown: context error %w", ctx.Err())
-		}
-		if !errors.Is(err, errs.ErrUnknownCommand) {
-			return err
-		}
-	}
-	return err
-}
-
 // DoWithRetryIfEmpty tries to implement function three times, if the input is empty.
 func DoWithRetryIfEmpty(ctx context.Context, rw rwmanager.RWService, f func(ctx context.Context) error) error {
 	var err error
