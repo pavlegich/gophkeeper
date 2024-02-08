@@ -62,6 +62,9 @@ func GetKnownErr(err error) error {
 	if errors.Is(err, errs.ErrInvalidFilePath) {
 		return errs.ErrInvalidFilePath
 	}
+	if errors.Is(err, errs.ErrUnknownCommand) {
+		return errs.ErrUnknownCommand
+	}
 	return nil
 }
 
