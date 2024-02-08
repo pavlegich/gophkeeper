@@ -47,6 +47,8 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 
 	act = strings.ToLower(act)
 	ctx = context.WithValue(ctx, utils.ContextActionKey, act)
+	var clientAct func(ctx context.Context) error
+
 	switch act {
 	case "register":
 		err := c.user.Register(ctx)
@@ -59,24 +61,20 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 			return fmt.Errorf("HandleCommand: login user failed %w", err)
 		}
 	case "create", "update":
-		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.data.CreateOrUpdate)
-		if err != nil {
-			return fmt.Errorf("HandleCommand: create or update data failed %w", err)
-		}
+		clientAct = c.data.CreateOrUpdate
 	case "get":
-		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.data.GetValue)
-		if err != nil {
-			return fmt.Errorf("HandleCommand: get data value failed %w", err)
-		}
+		clientAct = c.data.GetValue
 	case "delete":
-		err := utils.DoWithRetryIfEmpty(ctx, c.rw, c.data.Delete)
-		if err != nil {
-			return fmt.Errorf("HandleCommand: delete data failed %w", err)
-		}
+		clientAct = c.data.Delete
 	case "exit":
 		return fmt.Errorf("HandleCommand: %w", errs.ErrExit)
 	default:
 		return fmt.Errorf("HandleCommand: %w", errs.ErrUnknownCommand)
+	}
+
+	err = utils.DoWithRetryIfEmpty(ctx, c.rw, clientAct)
+	if err != nil {
+		return fmt.Errorf("HandleCommand: %s data failed %w", act, err)
 	}
 	return nil
 }

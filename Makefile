@@ -82,5 +82,4 @@ doc:
 	@echo 'open http://localhost:$(DOC_PORT)/pkg/github.com/pavlegich/gophkeeper/?m=all'
 	godoc -http=:$(DOC_PORT)
 
-.NOTPARALLEL:
 .PHONY: help tidy test test/cover doc

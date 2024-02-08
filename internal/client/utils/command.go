@@ -91,7 +91,7 @@ func DoWithRetryIfEmpty(ctx context.Context, rw rwmanager.RWService, f func(ctx 
 		if !errors.Is(err, errs.ErrEmptyInput) {
 			return err
 		}
-		rw.Writeln(ctx, errs.ErrEmptyInput.Error())
+		rw.Error(ctx, errs.ErrEmptyInput)
 	}
 	return err
 }
