@@ -35,7 +35,6 @@ func (c *Controller) BuildRoute(ctx context.Context) (*chi.Mux, error) {
 	r.Use(middlewares.WithLogging)
 	r.Use(middlewares.Recovery)
 	r.Use(middlewares.WithAuth(c.cfg.Token))
-	r.Use(middlewares.WithCompress)
 
 	users.Activate(ctx, r, c.cfg, c.db)
 	data.Activate(ctx, r, c.cfg, c.db)
