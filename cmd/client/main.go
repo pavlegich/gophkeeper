@@ -18,10 +18,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// go run -ldflags "-X 'main.buildVersion=v1.0.0' -X 'main.buildDate=$(date +'%d/%m/%Y')' -X 'main.buildCommit=1d1wdd1f'" main.go
+// go run -ldflags "-X 'main.buildVersion=v1.0.0' -X 'main.buildDate=$(date +'%d/%m/%Y')'" main.go
 var buildVersion string = "N/A"
 var buildDate string = "N/A"
-var buildCommit string = "N/A"
 
 func main() {
 	// Context
@@ -30,14 +29,11 @@ func main() {
 	defer stop()
 
 	// Manager for read and write
-	// f, _ := os.Open("commands")
-	// rw := rwmanager.NewRWManager(ctx, f, os.Stdout)
 	rw := rwmanager.NewRWManager(ctx, os.Stdin, os.Stdout)
 
 	// Versions
 	rw.Writeln(ctx, "Build version: "+buildVersion)
 	rw.Writeln(ctx, "Build date: "+buildDate)
-	rw.Writeln(ctx, "Build commit: "+buildCommit)
 
 	// Greeting
 	rw.Writeln(ctx, utils.Greet)
@@ -45,7 +41,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	// Logger
-	err := logger.Init(ctx, "Info")
+	err := logger.Init(ctx, "Panic")
 	if err != nil {
 		logger.Log.Error("main: logger initialization failed", zap.Error(err))
 	}
@@ -92,8 +88,7 @@ func main() {
 		case <-connsClosed:
 		case <-time.After(5 * time.Second):
 			rw.Writeln(ctx, "\n"+utils.UnexpectedQuit)
-			return
-			// panic("shutdown timeout")
+			panic("shutdown timeout")
 		}
 	}
 
