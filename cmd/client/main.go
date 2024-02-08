@@ -41,7 +41,6 @@ func main() {
 
 	// Greeting
 	rw.Writeln(ctx, utils.Greet)
-
 	// WaitGroup
 	wg := &sync.WaitGroup{}
 
