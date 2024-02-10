@@ -36,7 +36,6 @@ tidy:
 	go mod tidy -v
 
 ## audit: run quality control checks
-.PHONY: audit
 audit:
 	go mod verify
 	go vet ./...
@@ -82,4 +81,4 @@ doc:
 	@echo 'open http://localhost:$(DOC_PORT)/pkg/github.com/pavlegich/gophkeeper/?m=all'
 	godoc -http=:$(DOC_PORT)
 
-.PHONY: help tidy test test/cover doc
+.PHONY: help tidy audit test test/cover server/build server/run client/build client/run doc
