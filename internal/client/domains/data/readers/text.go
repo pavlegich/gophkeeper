@@ -37,7 +37,7 @@ func (r *TextReader) Read(ctx context.Context) ([]byte, error) {
 			return nil, fmt.Errorf("Read: couldn't read text %w", err)
 		}
 		if in != utils.Close {
-			r.text += in
+			r.text += in + " "
 		}
 	}
 

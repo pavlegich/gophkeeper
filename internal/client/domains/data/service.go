@@ -241,9 +241,11 @@ func createMultipartData(ctx context.Context, rw rwmanager.RWService, mpwriter *
 		dataReader = readers.NewTextReader(ctx, rw)
 	}
 
-	part, err = dataReader.Read(ctx)
-	if err != nil {
-		return fmt.Errorf("createMultipartData: couldn't read %s %w", d.Type, err)
+	if dataReader != nil {
+		part, err = dataReader.Read(ctx)
+		if err != nil {
+			return fmt.Errorf("createMultipartData: couldn't read %s %w", d.Type, err)
+		}
 	}
 
 	// Put data into the dataPart

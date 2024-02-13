@@ -72,9 +72,12 @@ func (c *Controller) HandleCommand(ctx context.Context) error {
 		return fmt.Errorf("HandleCommand: %w", errs.ErrUnknownCommand)
 	}
 
-	err = utils.DoWithRetryIfEmpty(ctx, c.rw, clientAct)
-	if err != nil {
-		return fmt.Errorf("HandleCommand: %s data failed %w", act, err)
+	if clientAct != nil {
+		err = utils.DoWithRetryIfEmpty(ctx, c.rw, clientAct)
+		if err != nil {
+			return fmt.Errorf("HandleCommand: %s data failed %w", act, err)
+		}
 	}
+
 	return nil
 }

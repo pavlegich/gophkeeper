@@ -50,9 +50,9 @@ func (s *UserService) Register(ctx context.Context) error {
 	}
 
 	target := s.cfg.Address + "/api/user/register"
-	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctxReq, http.MethodPost, target, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("Register: new request failed %w", err)
 	}
@@ -105,9 +105,9 @@ func (s *UserService) Login(ctx context.Context) error {
 	}
 
 	target := s.cfg.Address + "/api/user/login"
-	ctxReq, cancel := context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
-	req, err := http.NewRequestWithContext(ctxReq, http.MethodPost, target, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("Login: new request failed %w", err)
 	}

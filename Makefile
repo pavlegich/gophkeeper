@@ -22,9 +22,11 @@ CLIENT_LDFLAGS = "-X 'main.buildVersion=v1.0.0' -X 'main.buildDate=$(DATE)'"
 
 ## help: show this help message
 help:
-	@echo 'usage: make <target> ...'
-	@echo ''
+	@echo
+	@echo 'usage: make <target>'
+	@echo
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
+	@echo
 
 # ====================
 # QUALITY
